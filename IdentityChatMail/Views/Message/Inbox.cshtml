@@ -1,6 +1,42 @@
-﻿@{
+﻿@model List<IdentityChatMail.Entities.Message>
+
+@{
     Layout = "_MessageLayout";
 }
 
 
-<h2> deneme</h2>
+
+<div class="email-list m-t-15">
+    <div class="email-list m-t-15">
+
+        @foreach (var item in Model)
+        {
+            <div class="message">
+                <a href="/Message/MessageDetail/@item.MessageId">
+
+                    <div class="col-mail col-mail-1">
+                        <div class="email-checkbox">
+                            <input type="checkbox" id="chk_@item.MessageId">
+                            <label class="toggle" for="chk_@item.MessageId"></label>
+                        </div>
+
+                        <span class="star-toggle ti-star"></span>
+                    </div>
+
+                    <div class="col-mail col-mail-2">
+                        <div class="subject">
+                            @item.Subject
+                        </div>
+
+                        <div class="date">
+                            @item.SendDate.ToString("HH:mm")
+                        </div>
+                    </div>
+
+                </a>
+            </div>
+        }
+
+    </div>
+   
+</div>

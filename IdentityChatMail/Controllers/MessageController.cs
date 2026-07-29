@@ -19,12 +19,20 @@ namespace IdentityChatMail.Controllers
         }
 
 
+        public async Task<ActionResult> Profile()
+        {
+            var values = await _userManager.FindByNameAsync(User.Identity.Name);
+            ViewBag.v1 = values.Name + "" + values.Surname;
+            ViewBag.v2 = values.Email;
+            return View();
+        }
+
 
         public async Task<IActionResult> Inbox()
         {
-            //var values = await _userManager.FindByNameAsync(User.Identity.Name);
-            //var messageList = _context.Messages.Where(x => x.ReceiverEmail == values.Email).ToList();
-            return View(/*messageList*/);
+            var values = await _userManager.FindByNameAsync(User.Identity.Name);
+            var messageList = _context.Messages.Where(x => x.ReceiverEmail == values.Email).ToList();
+            return View(messageList);
         }
 
 
