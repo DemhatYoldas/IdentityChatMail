@@ -1,0 +1,330 @@
+﻿@{
+    Layout = null;
+}
+
+<!DOCTYPE html>
+<html lang="tr">
+
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Identity Chat & Mail</title>
+
+    <link rel="icon"
+          type="image/png"
+          sizes="16x16"
+          href="/master/images/favicon.png" />
+
+    <link href="/master/css/style.css" rel="stylesheet" />
+
+    <style>
+            html,
+            body {
+                width: 100%;
+                min-height: 100%;
+                margin: 0;
+                padding: 0;
+            }
+
+            body {
+                min-height: 100vh;
+                background-color: #f3f3f9;
+            }
+
+            #main-wrapper {
+                width: 100%;
+                min-height: 100vh;
+                display: flex;
+                flex-direction: column;
+            }
+
+            /* Temadan gelen sol boşluğu kaldırır */
+            .content-body {
+                width: 100% !important;
+                min-height: calc(100vh - 70px);
+                margin-left: 0 !important;
+                padding: 20px;
+                flex: 1;
+            }
+
+            .message-container {
+                width: 100%;
+                min-height: calc(100vh - 140px);
+                padding: 0;
+            }
+
+            .message-card {
+                width: 100%;
+                min-height: calc(100vh - 140px);
+                margin: 0;
+            }
+
+            .message-card-body {
+                width: 100%;
+                min-height: calc(100vh - 140px);
+                display: flex;
+                padding: 0;
+            }
+
+            /* Sol menü */
+            .email-left-box {
+                width: 25% !important;
+                min-width: 230px;
+                padding: 25px;
+                border-right: 1px solid #e5e5e5;
+                float: none !important;
+            }
+
+            /* Sağ içerik */
+            .email-right-box {
+                width: 75% !important;
+                min-height: calc(100vh - 140px);
+                padding: 25px;
+                margin-left: 0 !important;
+                float: none !important;
+                display: flex;
+                flex-direction: column;
+            }
+
+            .email-list {
+                width: 100%;
+                flex: 1;
+            }
+
+            .footer {
+                width: 100%;
+                margin-left: 0 !important;
+            }
+
+            /* Tablet ve telefon görünümü */
+            @@media (max-width: 768px) {
+                .content-body {
+                    padding: 10px;
+                }
+
+                .message-card-body {
+                    flex-direction: column;
+                }
+
+                .email-left-box,
+                .email-right-box {
+                    width: 100% !important;
+                    min-width: 100%;
+                }
+
+                .email-left-box {
+                    border-right: none;
+                    border-bottom: 1px solid #e5e5e5;
+                }
+            }
+    </style>
+
+</head>
+
+<body>
+
+    <!-- Preloader -->
+    <div id="preloader">
+        <div class="loader">
+            <svg class="circular" viewBox="25 25 50 50">
+                <circle class="path"
+                        cx="50"
+                        cy="50"
+                        r="20"
+                        fill="none"
+                        stroke-width="3"
+                        stroke-miterlimit="10">
+                </circle>
+            </svg>
+        </div>
+    </div>
+
+    <!-- Main Wrapper -->
+    <div id="main-wrapper">
+
+        <!-- Content Body -->
+        <div class="content-body">
+
+            <div class="container-fluid message-container">
+                <div class="row">
+                    <div class="col-12">
+
+                        <div class="card message-card">
+                            <div class="card-body message-card-body">
+
+                                <!-- Sol Menü -->
+                                <div class="email-left-box">
+
+                                    <a asp-controller="Message"
+                                       asp-action="CreateMessage"
+                                       class="btn btn-primary btn-block">
+                                        Yeni Mesaj
+                                    </a>
+
+                                    <div class="mail-list mt-4">
+
+                                        <a asp-controller="Message"
+                                           asp-action="Inbox"
+                                           class="list-group-item border-0 text-primary p-r-0">
+
+                                            <i class="fa fa-inbox font-18 align-middle mr-2"></i>
+
+                                            <b>Gelen Kutusu</b>
+
+                                            <span class="badge badge-primary badge-sm float-right m-t-5">
+                                                198
+                                            </span>
+                                        </a>
+
+                                        <a asp-controller="Message"
+                                           asp-action="Sendbox"
+                                           class="list-group-item border-0 p-r-0">
+
+                                            <i class="fa fa-paper-plane font-18 align-middle mr-2"></i>
+                                            Gönderilenler
+                                        </a>
+
+                                        <a href="#"
+                                           class="list-group-item border-0 p-r-0">
+
+                                            <i class="fa fa-star-o font-18 align-middle mr-2"></i>
+                                            Önemli
+
+                                            <span class="badge badge-danger badge-sm float-right m-t-5">
+                                                47
+                                            </span>
+                                        </a>
+
+                                        <a href="#"
+                                           class="list-group-item border-0 p-r-0">
+
+                                            <i class="mdi mdi-file-document-box font-18 align-middle mr-2"></i>
+                                            Taslaklar
+                                        </a>
+
+                                        <a href="#"
+                                           class="list-group-item border-0 p-r-0">
+
+                                            <i class="fa fa-trash font-18 align-middle mr-2"></i>
+                                            Çöp Kutusu
+                                        </a>
+
+                                    </div>
+                                </div>
+
+                                <!-- Sağ İçerik -->
+                                <div class="email-right-box">
+
+                                    <div role="toolbar" class="toolbar">
+                                        <div class="btn-group">
+
+                                            <button type="button"
+                                                    class="btn btn-dark dropdown-toggle"
+                                                    data-toggle="dropdown"
+                                                    aria-expanded="false">
+
+                                                Daha Fazla
+                                                <span class="caret m-l-5"></span>
+                                            </button>
+
+                                            <div class="dropdown-menu">
+
+                                                <span class="dropdown-header">
+                                                    Mesaj İşlemleri
+                                                </span>
+
+                                                <a href="#"
+                                                   class="dropdown-item">
+                                                    Okunmadı Olarak İşaretle
+                                                </a>
+
+                                                <a href="#"
+                                                   class="dropdown-item">
+                                                    Görevlere Ekle
+                                                </a>
+
+                                                <a href="#"
+                                                   class="dropdown-item">
+                                                    Yıldız Ekle
+                                                </a>
+
+                                                <a href="#"
+                                                   class="dropdown-item">
+                                                    Sessize Al
+                                                </a>
+
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Sayfaların geleceği alan -->
+                                    <div class="email-list mt-3">
+                                        @RenderBody()
+                                    </div>
+
+                                    <!-- Sayfalama -->
+                                    <div class="row mt-3">
+
+                                        <div class="col-7">
+                                            <div class="text-left">
+                                                1 - 20
+                                            </div>
+                                        </div>
+
+                                        <div class="col-5">
+                                            <div class="btn-group float-right">
+
+                                                <button class="btn btn-gradient"
+                                                        type="button">
+                                                    <i class="fa fa-angle-left"></i>
+                                                </button>
+
+                                                <button class="btn btn-dark"
+                                                        type="button">
+                                                    <i class="fa fa-angle-right"></i>
+                                                </button>
+
+                                            </div>
+                                        </div>
+
+                                    </div>
+
+                                </div>
+
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Footer -->
+        <div class="footer">
+            <div class="copyright">
+                <p>
+                    Copyright &copy;
+                    Designed &amp; Developed by
+                    <a href="#">Identity Chat &amp; Mail</a>
+                    2026
+                </p>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Scripts -->
+    <script src="/master/plugins/common/common.min.js"></script>
+    <script src="/master/js/custom.min.js"></script>
+    <script src="/master/js/settings.js"></script>
+    <script src="/master/js/gleek.js"></script>
+    <script src="/master/js/styleSwitcher.js"></script>
+
+    @await RenderSectionAsync("Scripts", required: false)
+
+</body>
+
+</html>
