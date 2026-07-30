@@ -1,0 +1,54 @@
+﻿@model IdentityChatMail.Entities.Message
+
+@{
+    Layout = "_MessageLayout";
+}
+
+<div class="read-content">
+
+    <div class="media pt-5">
+
+        <img class="mr-3 rounded-circle"
+             src="@ViewBag.ProfilImageUrl"
+             width="60"
+             height="60"
+             alt="Kullanıcı avatarı" />
+
+        <div class="media-body">
+
+            <h5 class="m-b-3">
+                @(ViewBag.Name ?? "AD YOK") @(ViewBag.Surname ?? "SOYAD YOK")
+            </h5>
+
+            <p class="m-b-2">
+                @Model.SendDate.ToString("dd MMMM yyyy", System.Globalization.CultureInfo.GetCultureInfo("tr-TR"))
+            </p>
+
+        </div>
+    </div>
+
+    <hr />
+
+    <div class="media mb-4 mt-1">
+        <div class="media-body">
+
+            <span class="float-right">
+                @Model.SendDate.ToString("HH:mm")
+            </span>
+
+            <h4 class="m-0 text-primary">
+                @Model.Subject
+            </h4>
+
+            <small class="text-muted">
+                @Model.ReceiverEmail
+            </small>
+
+        </div>
+    </div>
+
+    <p>
+        @Model.MessageDetail
+    </p>
+
+</div>

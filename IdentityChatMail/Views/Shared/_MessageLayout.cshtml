@@ -1,4 +1,5 @@
 ﻿@{
+
     Layout = null;
 }
 
@@ -155,13 +156,33 @@
                             <div class="card-body message-card-body">
 
                                 <!-- Sol Menü -->
-                                <div class="email-left-box">
+                                <div class="email-left-box">                               
+
+                                    <div class="d-flex mb-3">
+
+                                        <a asp-controller="Login"
+                                           asp-action="UserLogin"
+                                           class="btn btn-success flex-fill mr-2">
+                                            <i class="fa fa-sign-in mr-1"></i>
+                                            Giriş
+                                        </a>
+
+                                        <a asp-controller="Login"
+                                           asp-action="Logout"
+                                           class="btn btn-danger flex-fill">
+                                            <i class="fa fa-sign-out mr-1"></i>
+                                            Çıkış
+                                        </a>
+
+                                    </div>
 
                                     <a asp-controller="Message"
                                        asp-action="CreateMessage"
                                        class="btn btn-primary btn-block">
-                                        Yeni Mesaj
+                                        <i class="fa fa-plus mr-2"></i>
+                                        Yeni Mesaj Oluştur
                                     </a>
+
 
                                     <div class="mail-list mt-4">
 
@@ -215,79 +236,12 @@
                                 <!-- Sağ İçerik -->
                                 <div class="email-right-box">
 
-                                    <div role="toolbar" class="toolbar">
-                                        <div class="btn-group">
-
-                                            <button type="button"
-                                                    class="btn btn-dark dropdown-toggle"
-                                                    data-toggle="dropdown"
-                                                    aria-expanded="false">
-
-                                                Daha Fazla
-                                                <span class="caret m-l-5"></span>
-                                            </button>
-
-                                            <div class="dropdown-menu">
-
-                                                <span class="dropdown-header">
-                                                    Mesaj İşlemleri
-                                                </span>
-
-                                                <a href="#"
-                                                   class="dropdown-item">
-                                                    Okunmadı Olarak İşaretle
-                                                </a>
-
-                                                <a href="#"
-                                                   class="dropdown-item">
-                                                    Görevlere Ekle
-                                                </a>
-
-                                                <a href="#"
-                                                   class="dropdown-item">
-                                                    Yıldız Ekle
-                                                </a>
-
-                                                <a href="#"
-                                                   class="dropdown-item">
-                                                    Sessize Al
-                                                </a>
-
-                                            </div>
-                                        </div>
-                                    </div>
-
                                     <!-- Sayfaların geleceği alan -->
                                     <div class="email-list mt-3">
                                         @RenderBody()
                                     </div>
 
-                                    <!-- Sayfalama -->
-                                    <div class="row mt-3">
-
-                                        <div class="col-7">
-                                            <div class="text-left">
-                                                1 - 20
-                                            </div>
-                                        </div>
-
-                                        <div class="col-5">
-                                            <div class="btn-group float-right">
-
-                                                <button class="btn btn-gradient"
-                                                        type="button">
-                                                    <i class="fa fa-angle-left"></i>
-                                                </button>
-
-                                                <button class="btn btn-dark"
-                                                        type="button">
-                                                    <i class="fa fa-angle-right"></i>
-                                                </button>
-
-                                            </div>
-                                        </div>
-
-                                    </div>
+                                   
 
                                 </div>
 
@@ -320,8 +274,50 @@
     <script src="/master/js/settings.js"></script>
     <script src="/master/js/gleek.js"></script>
     <script src="/master/js/styleSwitcher.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+   
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
-    @await RenderSectionAsync("Scripts", required: false)
+    @if (TempData["Success"] != null)
+    {
+        <script>
+                Swal.fire({
+                    icon: 'success',
+                    title: '@TempData["Success"]'
+                });
+        </script>
+    }
+
+    @if (TempData["Error"] != null)
+    {
+        <script>
+                Swal.fire({
+                    icon: 'error',
+                    title: '@TempData["Error"]'
+                });
+        </script>
+    }
+
+    @if (TempData["Warning"] != null)
+    {
+        <script>
+                Swal.fire({
+                    icon: 'warning',
+                    title: '@TempData["Warning"]'
+                });
+        </script>
+    }
+
+    @if (TempData["Info"] != null)
+    {
+        <script>
+                Swal.fire({
+                    icon: 'info',
+                    title: '@TempData["Info"]'
+                });
+        </script>
+    }
+
 
 </body>
 

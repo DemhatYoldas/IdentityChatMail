@@ -2,6 +2,7 @@
 using IdentityChatMail.Entities;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace IdentityChatMail.Controllers
 {
@@ -19,15 +20,6 @@ namespace IdentityChatMail.Controllers
         }
 
 
-        public async Task<ActionResult> Profile()
-        {
-            var values = await _userManager.FindByNameAsync(User.Identity.Name);
-            ViewBag.v1 = values.Name + "" + values.Surname;
-            ViewBag.v2 = values.Email;
-            return View();
-        }
-
-
         public async Task<IActionResult> Inbox()
         {
             var values = await _userManager.FindByNameAsync(User.Identity.Name);
@@ -42,5 +34,86 @@ namespace IdentityChatMail.Controllers
             var messageList = _context.Messages.Where(x => x.SenderMail == values.Email).ToList();
             return View(messageList);
         }
+
+        [HttpGet]
+        public async Task<IActionResult> CreateMessage()
+        {
+            return View();
+        }
+
+      
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> CreateMessage(Message message)
+        {
+            var userName = User.Identity?.Name;
+
+            if (string.IsNullOrEmpty(userName))
+            {
+                return RedirectToAction("UserLogin", "Login");
+            }
+
+            var user = await _userManager.FindByNameAsync(userName);
+
+            if (user == null)
+            {
+                return RedirectToAction("UserLogin", "Login");
+            }
+
+            message.SenderMail = user.Email;
+            message.SendDate = DateTime.Now;
+            message.IsRead = false;
+
+            // Controller içinde doldurduğumuz alanların eski validasyon sonuçlarını kaldırıyoruz
+            ModelState.Remove(nameof(message.SenderMail));
+            ModelState.Remove(nameof(message.SendDate));
+            ModelState.Remove(nameof(message.IsRead));
+
+            if (!ModelState.IsValid)
+            {
+                return View(message);
+            }
+
+            _context.Messages.Add(message);
+            await _context.SaveChangesAsync();
+
+            TempData["Success"] = "Mesaj başarıyla gönderildi.";
+            return RedirectToAction("Sendbox");
+        }
+
+
+        public async Task<IActionResult> MessageDetails(int id)
+        {
+            var message = await _context.Messages
+                .FirstOrDefaultAsync(x => x.MessageId == id);
+
+            if (message == null)
+            {
+                return NotFound();
+            }
+
+            var senderUser = await _userManager.FindByEmailAsync(message.SenderMail);
+
+            
+
+            if (!message.IsRead)
+            {
+                message.IsRead = true;
+                await _context.SaveChangesAsync();
+            }
+
+
+
+            ViewBag.ProfilImageUrl = senderUser?.ProfilImageUrl;
+            ViewBag.Name = senderUser?.Name;
+            ViewBag.Surname = senderUser?.Surname;
+            ViewBag.Email = senderUser?.Email;
+
+            return View(message);
+        }
+
+
+
     }
 }

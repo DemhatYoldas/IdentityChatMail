@@ -1,8 +1,8 @@
 ﻿using Microsoft.AspNetCore.Identity;
 
-namespace IdentityChatMail.Models
+namespace IdentityChatMailDay.Models
 {
-    public class CustomIdentityValidator:IdentityErrorDescriber
+    public class CustomIdentityValidator : IdentityErrorDescriber
     {
         public override IdentityError PasswordRequiresUpper()
         {
@@ -21,7 +21,6 @@ namespace IdentityChatMail.Models
                 Description = "Lütfen en az bir küçük harf içeren bir şifre girin."
             };
         }
-
 
         public override IdentityError PasswordRequiresDigit()
         {

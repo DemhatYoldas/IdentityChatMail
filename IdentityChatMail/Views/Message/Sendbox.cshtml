@@ -14,14 +14,12 @@
         @foreach (var item in Model)
         {
             <div class="message">
-                <a href="/Message/MessageDetail/@item.MessageId">
-
+                <a href="@Url.Action("MessageDetails", "Message", new { id = item.MessageId })">
                     <div class="col-mail col-mail-1">
                         <div class="email-checkbox">
                             <input type="checkbox" id="chk_@item.MessageId">
                             <label class="toggle" for="chk_@item.MessageId"></label>
                         </div>
-
                         <span class="star-toggle ti-star"></span>
                     </div>
 
@@ -29,16 +27,13 @@
                         <div class="subject">
                             @item.Subject
                         </div>
-
                         <div class="date">
-                            @item.SendDate.ToString("HH:mm")
+                            @item.SendDate.ToString("dd MMMM yyyy", System.Globalization.CultureInfo.GetCultureInfo("tr-TR"))
                         </div>
                     </div>
-
                 </a>
             </div>
         }
-
     </div>
 
 </div>
