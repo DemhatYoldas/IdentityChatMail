@@ -6,8 +6,6 @@
 
 
 
-
-<div class="email-list m-t-15">
     <div class="email-list m-t-15">
 
         @foreach (var item in Model)
@@ -19,7 +17,9 @@
                             <input type="checkbox" id="chk_@item.MessageId">
                             <label class="toggle" for="chk_@item.MessageId"></label>
                         </div>
-                        <span class="star-toggle ti-star"></span>
+                 
+                            <span class="star-toggle ti-star text-warning"></span>
+                    
                     </div>
 
                     <div class="col-mail col-mail-2">
@@ -27,7 +27,7 @@
                             @item.Subject
                         </div>
                         <div class="date">
-                            @item.SendDate.ToString("dd MMMM yyyy", System.Globalization.CultureInfo.GetCultureInfo("tr-TR"))
+                            @item.SendDate.ToString("dd MMMM ", System.Globalization.CultureInfo.GetCultureInfo("tr-TR"))
                            
                         </div>
                     </div>

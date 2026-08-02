@@ -4,6 +4,7 @@ using IdentityChatMail.Context;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace IdentityChatMail.Migrations
 {
     [DbContext(typeof(MailContext))]
-    partial class MailContextModelSnapshot : ModelSnapshot
+    [Migration("20260802120151_AddImportantColumns")]
+    partial class AddImportantColumns
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -118,17 +121,11 @@ namespace IdentityChatMail.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<bool>("ReceiverIsDeleted")
-                        .HasColumnType("bit");
-
                     b.Property<bool>("ReceiverIsImportant")
                         .HasColumnType("bit");
 
                     b.Property<DateTime>("SendDate")
                         .HasColumnType("datetime2");
-
-                    b.Property<bool>("SenderIsDeleted")
-                        .HasColumnType("bit");
 
                     b.Property<bool>("SenderIsImportant")
                         .HasColumnType("bit");

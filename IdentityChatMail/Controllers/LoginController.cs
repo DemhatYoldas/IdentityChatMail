@@ -17,6 +17,11 @@ namespace IdentityChatMail.Controllers
         [HttpGet]
         public IActionResult UserLogin()
         {
+            if (User.Identity.IsAuthenticated)
+            {
+                return RedirectToAction("Inbox", "Message");
+            }
+
             return View();
         }
 
@@ -38,13 +43,23 @@ namespace IdentityChatMail.Controllers
             if (result.Succeeded)
             {
                 return RedirectToAction("Inbox", "Message");
+
             }
 
             ModelState.AddModelError(
                 string.Empty,
                 "Kullanıcı adı veya şifre hatalı.");
 
+            TempData["Success"] = "Hoş Geldiniz.";
             return View(model);
+        }
+
+
+        public async Task<IActionResult> Logout()
+        {
+            await _signInManager.SignOutAsync();
+            return RedirectToAction("UserLogin", "Login");
+
         }
     }
 }

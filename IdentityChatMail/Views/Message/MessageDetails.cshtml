@@ -2,6 +2,12 @@
 
 @{
     Layout = "_MessageLayout";
+
+    var userEmail = ViewBag.CurrentUserEmail as string;
+
+    var isImportant = Model.ReceiverEmail == userEmail
+        ? Model.ReceiverIsImportant
+        : Model.SenderIsImportant;
 }
 
 <div class="read-content">
@@ -21,7 +27,9 @@
             </h5>
 
             <p class="m-b-2">
-                @Model.SendDate.ToString("dd MMMM yyyy", System.Globalization.CultureInfo.GetCultureInfo("tr-TR"))
+                @Model.SendDate.ToString(
+                    "dd MMMM yyyy",
+                    System.Globalization.CultureInfo.GetCultureInfo("tr-TR"))
             </p>
 
         </div>
@@ -50,5 +58,31 @@
     <p>
         @Model.MessageDetail
     </p>
+
+    <hr />
+
+    <a href="@Url.Action(
+                                     "ToggleImportant",
+                                     "Message",
+                                     new { id = Model.MessageId })"
+       class="btn @(isImportant ? "btn-warning" : "btn-outline-warning")">
+
+        <i class="ti-star"></i>
+
+        @(isImportant ? "Önemden Çıkar" : "Önemli Yap")
+    </a>
+    <br />
+    <br />
+    <a href="@Url.Action(
+                                 "MoveToTrash",
+                                 "Message",
+                                 new { id = Model.MessageId })"
+       class="btn btn-outline-danger"
+       onclick="return confirm('Mesaj çöp kutusuna taşınsın mı?')">
+
+        <i class="ti-trash"></i>
+        Çöp Kutusuna Taşı
+    </a>
+
 
 </div>

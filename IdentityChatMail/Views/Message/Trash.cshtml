@@ -1,0 +1,50 @@
+﻿@model List<IdentityChatMail.Entities.Message>
+
+@{
+    Layout = "_MessageLayout";
+}
+
+<div class="email-list m-t-15">
+
+    @if (!Model.Any())
+    {
+        <div class="alert alert-info">
+            Çöp kutusunda mesaj bulunmuyor.
+        </div>
+    }
+    else
+    {
+        @foreach (var item in Model)
+        {
+            <div class="message">
+
+                <a href="@Url.Action(
+                                               "MessageDetails",
+                                               "Message",
+                                               new { id = item.MessageId })">
+
+                    <div class="col-mail col-mail-1">
+                        <span class="ti-trash text-danger"></span>
+                    </div>
+
+                    <div class="col-mail col-mail-2">
+
+                        <div class="subject">
+                            @item.Subject
+                        </div>
+
+                        <div class="date">
+                            @item.SendDate.ToString(
+                                "dd MMMM",
+                                System.Globalization.CultureInfo.GetCultureInfo("tr-TR"))
+                        </div>
+
+                    </div>
+
+                </a>
+
+            </div>
+        }
+    }
+
+</div>

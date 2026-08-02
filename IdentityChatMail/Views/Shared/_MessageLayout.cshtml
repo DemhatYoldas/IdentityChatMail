@@ -156,13 +156,13 @@
                             <div class="card-body message-card-body">
 
                                 <!-- Sol Menü -->
-                                <div class="email-left-box">                               
+                                <div class="email-left-box">
 
                                     <div class="d-flex mb-3">
 
                                         <a asp-controller="Login"
-                                           asp-action="UserLogin"
-                                           class="btn btn-success flex-fill mr-2">
+                                            asp-action="UserLogin"
+                                            class="btn btn-success flex-fill mr-2">
                                             <i class="fa fa-sign-in mr-1"></i>
                                             Giriş
                                         </a>
@@ -194,7 +194,7 @@
 
                                             <b>Gelen Kutusu</b>
 
-                                           @*  <span class="badge badge-primary badge-sm float-right m-t-5">
+                                            @*  <span class="badge badge-primary badge-sm float-right m-t-5">
                                                 198
                                             </span> *@
                                         </a>
@@ -207,14 +207,11 @@
                                             Gönderilenler
                                         </a>
 
-                                        <a href="#"
-                                           class="list-group-item border-0 p-r-0">
-
-                                            <i class="fa fa-star-o font-18 align-middle mr-2"></i>
+                                        <a asp-controller="Message" asp-action="Important">
+                                            <i class="ti-star"></i>
                                             Önemli
-
-                                           
                                         </a>
+
 
                                         <a href="#"
                                            class="list-group-item border-0 p-r-0">
@@ -223,11 +220,9 @@
                                             Taslaklar
                                         </a>
 
-                                        <a href="#"
-                                           class="list-group-item border-0 p-r-0">
-
-                                            <i class="fa fa-trash font-18 align-middle mr-2"></i>
-                                            Çöp Kutusu
+                                        <a asp-controller="Message" asp-action="Trash">
+                                            <i class="ti-trash"></i>
+                                            <span class="nav-text">Çöp Kutusu</span>
                                         </a>
 
                                     </div>
@@ -275,45 +270,25 @@
     <script src="/master/js/gleek.js"></script>
     <script src="/master/js/styleSwitcher.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-   
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    @{
+        var alertType = TempData["Success"] != null ? "success"
+                      : TempData["Error"] != null ? "error"
+                      : TempData["Warning"] != null ? "warning"
+                      : TempData["Info"] != null ? "info"
+                      : null;
 
-    @if (TempData["Success"] != null)
-    {
-        <script>
-                Swal.fire({
-                    icon: 'success',
-                    title: '@TempData["Success"]'
-                });
-        </script>
+        var alertMessage = TempData["Success"] ?? TempData["Error"] ?? TempData["Warning"] ?? TempData["Info"];
     }
 
-    @if (TempData["Error"] != null)
+    @if (alertType != null)
     {
         <script>
                 Swal.fire({
-                    icon: 'error',
-                    title: '@TempData["Error"]'
-                });
-        </script>
-    }
-
-    @if (TempData["Warning"] != null)
-    {
-        <script>
-                Swal.fire({
-                    icon: 'warning',
-                    title: '@TempData["Warning"]'
-                });
-        </script>
-    }
-
-    @if (TempData["Info"] != null)
-    {
-        <script>
-                Swal.fire({
-                    icon: 'info',
-                    title: '@TempData["Info"]'
+                    icon: '@alertType',
+                    title: '@alertMessage',
+                    timer: 2000,
+                    timerProgressBar: true,
+                    showConfirmButton: false
                 });
         </script>
     }
