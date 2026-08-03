@@ -4,9 +4,9 @@
     Layout = "_MessageLayout";
 }
 
-<div class="email-list m-t-15">
+<div class="trash-list">
 
-    @if (!Model.Any())
+    @if (Model == null || !Model.Any())
     {
         <div class="alert alert-info">
             Çöp kutusunda mesaj bulunmuyor.
@@ -16,35 +16,154 @@
     {
         @foreach (var item in Model)
         {
-            <div class="message">
+            <div class="trash-message">
 
-                <a href="@Url.Action(
-                                               "MessageDetails",
-                                               "Message",
-                                               new { id = item.MessageId })">
+                <div class="trash-icon">
+                    <i class="ti-trash"></i>
+                </div>
 
-                    <div class="col-mail col-mail-1">
-                        <span class="ti-trash text-danger"></span>
-                    </div>
+                <div class="trash-content">
 
-                    <div class="col-mail col-mail-2">
+                    <a asp-controller="Message"
+                       asp-action="MessageDetails"
+                       asp-route-id="@item.MessageId"
+                       class="trash-subject">
 
-                        <div class="subject">
-                            @item.Subject
-                        </div>
+                        @item.Subject
+                    </a>
 
-                        <div class="date">
-                            @item.SendDate.ToString(
-                                "dd MMMM",
-                                System.Globalization.CultureInfo.GetCultureInfo("tr-TR"))
-                        </div>
+                    <span class="trash-date">
+                        @item.SendDate.ToString(
+                            "dd MMMM",
+                            System.Globalization.CultureInfo.GetCultureInfo("tr-TR"))
+                    </span>
 
-                    </div>
+                </div>
 
-                </a>
+                <div class="trash-actions">
+
+                    <a asp-controller="Message"
+                       asp-action="MessageDetails"
+                       asp-route-id="@item.MessageId"
+                       class="btn btn-sm btn-primary"
+                       title="Mesajı görüntüle">
+
+                        <i class="ti-eye"></i>
+                        Detay
+                    </a>
+
+                    <a asp-controller="Message"
+                       asp-action="RestoreMessage"
+                       asp-route-id="@item.MessageId"
+                       class="btn btn-sm btn-success"
+                       onclick="return confirm('Mesaj geri yüklensin mi?')">
+
+                        <i class="ti-back-left"></i>
+                        Geri Yükle
+                    </a>
+
+                    <a asp-controller="Message"
+                       asp-action="DeletePermanently"
+                       asp-route-id="@item.MessageId"
+                       class="btn btn-sm btn-danger"
+                       onclick="return confirm('Mesaj kalıcı olarak silinsin mi? Bu işlem geri alınamaz.')">
+
+                        <i class="ti-trash"></i>
+                        Kalıcı Sil
+                    </a>
+
+                </div>
 
             </div>
         }
     }
 
 </div>
+
+<style>
+    .trash-list {
+        margin-top: 15px;
+        width: 100%;
+    }
+
+    .trash-message {
+        display: flex;
+        align-items: center;
+        min-height: 75px;
+        padding: 12px 18px;
+        border-bottom: 1px solid #eeeeee;
+        transition: background-color 0.2s ease;
+    }
+
+    .trash-message:hover {
+        background-color: #f8f8fc;
+    }
+
+    .trash-icon {
+        width: 35px;
+        flex-shrink: 0;
+        color: #ff5c62;
+        font-size: 17px;
+    }
+
+    .trash-content {
+        display: flex;
+        align-items: center;
+        min-width: 0;
+        flex: 1;
+    }
+
+    .trash-subject {
+        overflow: hidden;
+        color: #6b7280;
+        font-size: 16px;
+        text-decoration: none;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    .trash-subject:hover {
+        color: #716cff;
+        text-decoration: none;
+    }
+
+    .trash-date {
+        margin-left: auto;
+        padding: 0 25px;
+        color: #718096;
+        white-space: nowrap;
+    }
+
+    .trash-actions {
+        display: flex;
+        flex-shrink: 0;
+        gap: 6px;
+    }
+
+    .trash-actions .btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+    }
+
+    @@media (max-width: 900px) {
+        .trash-message {
+            align-items: flex-start;
+        }
+
+        .trash-content {
+            flex-direction: column;
+            align-items: flex-start;
+        }
+
+        .trash-date {
+            margin: 5px 0 0;
+            padding: 0;
+        }
+
+        .trash-actions {
+            flex-direction: column;
+            margin-left: 10px;
+        }
+    }
+</style>

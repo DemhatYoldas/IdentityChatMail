@@ -23,21 +23,44 @@ namespace IdentityChatMail.Controllers
         }
 
 
-        public async Task<IActionResult> Inbox()
+        public async Task<IActionResult> Inbox(string searchTerm)
         {
-            var values = await _userManager.FindByNameAsync(User.Identity!.Name!);
+            var userName = User.Identity?.Name;
 
-            if (values == null || string.IsNullOrEmpty(values.Email))
+            if (string.IsNullOrEmpty(userName))
             {
                 return RedirectToAction("UserLogin", "Login");
             }
 
-            var messageList = await _context.Messages
+            var currentUser = await _userManager.FindByNameAsync(userName);
+
+            if (currentUser == null || string.IsNullOrEmpty(currentUser.Email))
+            {
+                return RedirectToAction("UserLogin", "Login");
+            }
+
+            var query = _context.Messages
                 .Where(x =>
-                    x.ReceiverEmail == values.Email &&
-                    !x.ReceiverIsDeleted)
+                    x.ReceiverEmail == currentUser.Email &&
+                    !x.ReceiverIsDeleted &&
+                    !x.ReceiverIsPermanentlyDeleted &&
+                    !x.IsDraft);
+
+            if (!string.IsNullOrWhiteSpace(searchTerm))
+            {
+                searchTerm = searchTerm.Trim();
+
+                query = query.Where(x =>
+                    x.Subject.Contains(searchTerm) ||
+                    x.MessageDetail.Contains(searchTerm) ||
+                    x.SenderMail.Contains(searchTerm));
+            }
+
+            var messageList = await query
                 .OrderByDescending(x => x.SendDate)
                 .ToListAsync();
+
+            ViewBag.SearchTerm = searchTerm;
 
             return View(messageList);
         }
@@ -45,7 +68,7 @@ namespace IdentityChatMail.Controllers
         public async Task<IActionResult> Sendbox()
         {
             var values = await _userManager.FindByNameAsync(User.Identity.Name);
-            var messageList = await _context.Messages.Where(x =>x.SenderMail == values.Email &&!x.SenderIsDeleted).OrderByDescending(x => x.SendDate).ToListAsync();
+            var messageList = await _context.Messages.Where(x =>x.SenderMail == values.Email &&!x.SenderIsDeleted && !x.IsDraft).OrderByDescending(x => x.SendDate).ToListAsync();
             return View(messageList);
         }
 
@@ -78,11 +101,14 @@ namespace IdentityChatMail.Controllers
             message.SenderMail = user.Email;
             message.SendDate = DateTime.Now;
             message.IsRead = false;
+            message.IsDraft = false;
 
             // Controller içinde doldurduğumuz alanların eski validasyon sonuçlarını kaldırıyoruz
+
             ModelState.Remove(nameof(message.SenderMail));
             ModelState.Remove(nameof(message.SendDate));
             ModelState.Remove(nameof(message.IsRead));
+            ModelState.Remove(nameof(message.IsDraft));
 
             if (!ModelState.IsValid)
             {
@@ -231,6 +257,65 @@ namespace IdentityChatMail.Controllers
 
 
 
+        [HttpGet]
+        public async Task<IActionResult> RestoreMessage(int id)
+        {
+            var userName = User.Identity?.Name;
+
+            if (string.IsNullOrEmpty(userName))
+            {
+                return RedirectToAction("UserLogin", "Login");
+            }
+
+            var currentUser = await _userManager.FindByNameAsync(userName);
+
+            if (currentUser == null || string.IsNullOrEmpty(currentUser.Email))
+            {
+                return RedirectToAction("UserLogin", "Login");
+            }
+
+            var userEmail = currentUser.Email;
+
+            var message = await _context.Messages
+                .FirstOrDefaultAsync(x =>
+                    x.MessageId == id &&
+                    (
+                        (x.ReceiverEmail == userEmail &&
+                         x.ReceiverIsDeleted &&
+                         !x.ReceiverIsPermanentlyDeleted)
+                        ||
+                        (x.SenderMail == userEmail &&
+                         x.SenderIsDeleted &&
+                         !x.SenderIsPermanentlyDeleted)
+                    ));
+
+            if (message == null)
+            {
+                return NotFound();
+            }
+
+            if (message.ReceiverEmail == userEmail &&
+                message.ReceiverIsDeleted)
+            {
+                message.ReceiverIsDeleted = false;
+            }
+            else if (message.SenderMail == userEmail &&
+                     message.SenderIsDeleted)
+            {
+                message.SenderIsDeleted = false;
+            }
+
+            await _context.SaveChangesAsync();
+
+            TempData["Success"] = "Mesaj başarıyla geri yüklendi.";
+
+            return RedirectToAction(nameof(Trash));
+        }
+
+
+
+
+
 
         [HttpGet]
         public async Task<IActionResult> MoveToTrash(int id)
@@ -298,14 +383,148 @@ namespace IdentityChatMail.Controllers
             var userEmail = currentUser.Email;
 
             var messages = await _context.Messages
+                   .Where(x =>
+                   (x.ReceiverEmail == userEmail &&
+                    x.ReceiverIsDeleted && 
+                    !x.ReceiverIsPermanentlyDeleted) || 
+                    (x.SenderMail == userEmail && x.SenderIsDeleted 
+                    && !x.SenderIsPermanentlyDeleted))
+                   .OrderByDescending(x => x.SendDate)
+                   .ToListAsync();
+            return View(messages);
+        }
+
+
+        [HttpGet]
+        public async Task<IActionResult> DeletePermanently(int id)
+        {
+            var userName = User.Identity?.Name;
+
+            if (string.IsNullOrEmpty(userName))
+            {
+                return RedirectToAction("UserLogin", "Login");
+            }
+
+            var currentUser = await _userManager.FindByNameAsync(userName);
+
+            if (currentUser == null || string.IsNullOrEmpty(currentUser.Email))
+            {
+                return RedirectToAction("UserLogin", "Login");
+            }
+
+            var userEmail = currentUser.Email;
+
+            var message = await _context.Messages
+                .FirstOrDefaultAsync(x =>
+                    x.MessageId == id &&
+                    (
+                        (x.ReceiverEmail == userEmail &&
+                         x.ReceiverIsDeleted &&
+                         !x.ReceiverIsPermanentlyDeleted)
+                        ||
+                        (x.SenderMail == userEmail &&
+                         x.SenderIsDeleted &&
+                         !x.SenderIsPermanentlyDeleted)
+                    ));
+
+            if (message == null)
+            {
+                return NotFound();
+            }
+
+            if (message.ReceiverEmail == userEmail)
+            {
+                message.ReceiverIsPermanentlyDeleted = true;
+            }
+            else if (message.SenderMail == userEmail)
+            {
+                message.SenderIsPermanentlyDeleted = true;
+            }
+
+            // Her iki kullanıcı da kalıcı sildiyse veritabanından tamamen kaldır.
+            if (message.ReceiverIsPermanentlyDeleted &&
+                message.SenderIsPermanentlyDeleted)
+            {
+                _context.Messages.Remove(message);
+            }
+
+            await _context.SaveChangesAsync();
+
+            TempData["Success"] = "Mesaj kalıcı olarak silindi.";
+
+            return RedirectToAction("Trash");
+        }
+
+
+
+        [HttpPost]
+        public async Task<IActionResult> SaveDraft(Message message)
+        {
+            var userName = User.Identity?.Name;
+
+            if (string.IsNullOrEmpty(userName))
+            {
+                return RedirectToAction("UserLogin", "Login");
+            }
+
+            var currentUser = await _userManager.FindByNameAsync(userName);
+
+            if (currentUser == null || string.IsNullOrEmpty(currentUser.Email))
+            {
+                return RedirectToAction("UserLogin", "Login");
+            }
+
+            message.SenderMail = currentUser.Email;
+            message.SendDate = DateTime.Now;
+            message.IsRead = false;
+            message.IsDraft = true;
+
+            // Boş alanların veritabanında hata vermemesi için
+            message.ReceiverEmail ??= string.Empty;
+            message.Subject ??= string.Empty;
+            message.MessageDetail ??= string.Empty;
+
+            _context.Messages.Add(message);
+            await _context.SaveChangesAsync();
+
+            TempData["Success"] = "Mesaj taslaklara kaydedildi.";
+
+            return RedirectToAction("Drafts");
+        }
+
+
+
+
+        public async Task<IActionResult> Drafts()
+        {
+            var userName = User.Identity?.Name;
+
+            if (string.IsNullOrEmpty(userName))
+            {
+                return RedirectToAction("UserLogin", "Login");
+            }
+
+            var currentUser = await _userManager.FindByNameAsync(userName);
+
+            if (currentUser == null || string.IsNullOrEmpty(currentUser.Email))
+            {
+                return RedirectToAction("UserLogin", "Login");
+            }
+
+            var userEmail = currentUser.Email;
+
+            var drafts = await _context.Messages
                 .Where(x =>
-                    (x.ReceiverEmail == userEmail && x.ReceiverIsDeleted) ||
-                    (x.SenderMail == userEmail && x.SenderIsDeleted))
+                    x.SenderMail == userEmail &&
+                    x.IsDraft &&
+                    !x.SenderIsDeleted &&
+                    !x.SenderIsPermanentlyDeleted)
                 .OrderByDescending(x => x.SendDate)
                 .ToListAsync();
 
-            return View(messages);
+            return View(drafts);
         }
+
 
     }
 }

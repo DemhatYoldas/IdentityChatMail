@@ -13,6 +13,9 @@
         public bool ReceiverIsImportant { get; set; } = false;
         public bool SenderIsDeleted { get; set; } = false;
         public bool ReceiverIsDeleted { get; set; } = false;
+        public bool SenderIsPermanentlyDeleted { get; set; } = false;
+        public bool ReceiverIsPermanentlyDeleted { get; set; } = false;
+        public bool IsDraft { get; set; } = false;
 
     }
 }

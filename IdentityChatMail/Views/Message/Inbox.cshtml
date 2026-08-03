@@ -2,39 +2,117 @@
 
 @{
     Layout = "_MessageLayout";
+
+    var searchTerm = ViewBag.SearchTerm as string;
 }
 
+<!-- Arama alanı -->
+<div class="mb-3">
 
+    <form asp-controller="Message"
+          asp-action="Inbox"
+          method="get">
 
-    <div class="email-list m-t-15">
+        <div class="input-group">
 
+            <input type="text"
+                   name="searchTerm"
+                   value="@searchTerm"
+                   class="form-control"
+                   placeholder="Konu, içerik veya gönderen ara..." />
+
+            <div class="input-group-append">
+
+                <button type="submit"
+                        class="btn btn-primary">
+
+                    <i class="ti-search"></i>
+                    Ara
+                </button>
+
+                @if (!string.IsNullOrWhiteSpace(searchTerm))
+                {
+                    <a asp-controller="Message"
+                       asp-action="Inbox"
+                       class="btn btn-secondary">
+
+                        <i class="ti-close"></i>
+                        Temizle
+                    </a>
+                }
+
+            </div>
+
+        </div>
+
+    </form>
+
+</div>
+
+<!-- Mesaj listesi -->
+<div class="email-list m-t-15">
+
+    @if (Model == null || !Model.Any())
+    {
+        <div class="alert alert-info">
+
+            @if (!string.IsNullOrWhiteSpace(searchTerm))
+            {
+                <span>
+                    “<strong>@searchTerm</strong>” aramasıyla eşleşen mesaj bulunamadı.
+                </span>
+            }
+            else
+            {
+                <span>Gelen kutusunda mesaj bulunmuyor.</span>
+            }
+
+        </div>
+    }
+    else
+    {
         @foreach (var item in Model)
         {
             <div class="message">
-                <a href="@Url.Action("MessageDetails", "Message", new { id = item.MessageId })">
+
+                <a href="@Url.Action(
+                                               "MessageDetails",
+                                               "Message",
+                                               new { id = item.MessageId })">
+
                     <div class="col-mail col-mail-1">
+
                         <div class="email-checkbox">
-                            <input type="checkbox" id="chk_@item.MessageId">
-                            <label class="toggle" for="chk_@item.MessageId"></label>
+                            <input type="checkbox"
+                                   id="chk_@item.MessageId" />
+
+                            <label class="toggle"
+                                   for="chk_@item.MessageId">
+                            </label>
                         </div>
-                 
-                            <span class="star-toggle ti-star text-warning"></span>
-                    
+
+                        <span class="star-toggle ti-star text-warning"></span>
+
                     </div>
 
                     <div class="col-mail col-mail-2">
+
                         <div class="subject">
                             @item.Subject
                         </div>
+
                         <div class="date">
-                            @item.SendDate.ToString("dd MMMM ", System.Globalization.CultureInfo.GetCultureInfo("tr-TR"))
-                           
+                            @item.SendDate.ToString(
+                                "dd MMMM",
+                                System.Globalization.CultureInfo.GetCultureInfo("tr-TR"))
                         </div>
+
                     </div>
+
                 </a>
+
             </div>
         }
-    </div>
+    }
 
-
-
+</div>
