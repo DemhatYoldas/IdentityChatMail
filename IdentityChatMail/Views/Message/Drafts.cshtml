@@ -4,54 +4,407 @@
     Layout = "_MessageLayout";
 }
 
-<div class="email-list m-t-15">
+<div class="drafts-page">
 
-    @if (Model == null || !Model.Any())
-    {
-        <div class="alert alert-info">
-            Kaydedilmiş taslak bulunmuyor.
+    <!-- Sayfa başlığı -->
+    <div class="drafts-header">
+
+        <div class="drafts-heading">
+
+            <div class="drafts-heading-icon">
+                <i class="ti-save"></i>
+            </div>
+
+            <div>
+                <h4>Taslaklar</h4>
+                <p>Henüz göndermediğiniz mesajları görüntüleyin.</p>
+            </div>
+
         </div>
-    }
-    else
-    {
-        @foreach (var item in Model)
+
+        <span class="drafts-count">
+            @(Model?.Count ?? 0) taslak
+        </span>
+
+    </div>
+
+    <!-- Taslak listesi -->
+    <div class="drafts-list">
+
+        @if (Model == null || !Model.Any())
         {
-            <div class="message">
+            <div class="drafts-empty-state">
+
+                <div class="drafts-empty-icon">
+                    <i class="ti-save"></i>
+                </div>
+
+                <h5>Kaydedilmiş taslak bulunmuyor</h5>
+
+                <p>
+                    Taslak olarak kaydettiğiniz mesajlar burada görüntülenecek.
+                </p>
 
                 <a asp-controller="Message"
-                   asp-action="MessageDetails"
-                   asp-route-id="@item.MessageId">
+                   asp-action="CreateMessage"
+                   class="btn drafts-create-button">
 
-                    <div class="col-mail col-mail-1">
-                        <span class="ti-save text-warning"></span>
-                    </div>
-
-                    <div class="col-mail col-mail-2">
-
-                        <div class="subject">
-                            @(string.IsNullOrWhiteSpace(item.Subject)
-                                ? "(Konu bulunmuyor)"
-                                : item.Subject)
-
-                            <span class="text-muted">
-                                — @(string.IsNullOrWhiteSpace(item.ReceiverEmail)
-                                                                    ? "Alıcı belirtilmedi"
-                                                                    : item.ReceiverEmail)
-                            </span>
-                        </div>
-
-                        <div class="date">
-                            @item.SendDate.ToString(
-                                "dd MMMM",
-                                System.Globalization.CultureInfo.GetCultureInfo("tr-TR"))
-                        </div>
-
-                    </div>
-
+                    <i class="fa fa-plus mr-1"></i>
+                    Yeni Mesaj Oluştur
                 </a>
 
             </div>
         }
-    }
+        else
+        {
+            @foreach (var item in Model)
+            {
+                <div class="drafts-row">
+
+                    <div class="drafts-icon">
+                        <i class="ti-save"></i>
+                    </div>
+
+                    <a asp-controller="Message"
+                       asp-action="MessageDetails"
+                       asp-route-id="@item.MessageId"
+                       class="drafts-message-link">
+
+                        <div class="drafts-receiver">
+
+                            <span class="drafts-receiver-label">
+                                Alıcı
+                            </span>
+
+                            <span class="drafts-receiver-value">
+
+                                @(string.IsNullOrWhiteSpace(item.ReceiverEmail)
+                                    ? "Alıcı belirtilmedi"
+                                    : item.ReceiverEmail)
+
+                            </span>
+
+                        </div>
+
+                        <div class="drafts-message-content">
+
+                            <span class="drafts-badge">
+                                Taslak
+                            </span>
+
+                            <div class="drafts-text">
+
+                                <span class="drafts-subject">
+
+                                    @(string.IsNullOrWhiteSpace(item.Subject)
+                                        ? "(Konu bulunmuyor)"
+                                        : item.Subject)
+
+                                </span>
+
+                                <span class="drafts-preview">
+                                    — @(string.IsNullOrWhiteSpace(item.MessageDetail)
+                                                                            ? "Mesaj içeriği bulunmuyor"
+                                                                            : item.MessageDetail)
+                                </span>
+
+                            </div>
+
+                        </div>
+
+                        <div class="drafts-date">
+
+                            <i class="ti-time"></i>
+
+                            @item.SendDate.ToString(
+                                "dd MMMM",
+                                System.Globalization.CultureInfo.GetCultureInfo("tr-TR"))
+
+                        </div>
+
+                    </a>
+
+                </div>
+            }
+        }
+
+    </div>
 
 </div>
+
+<style>
+    .drafts-page {
+        overflow: hidden;
+        width: 100%;
+        border: 1px solid #ececf4;
+        border-radius: 16px;
+        background-color: #ffffff;
+        box-shadow: 0 10px 30px rgba(35, 31, 91, 0.06);
+    }
+
+    .drafts-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 21px 24px;
+        background: linear-gradient( 135deg, #625df5 0%, #8b6df6 100% );
+        color: #ffffff;
+    }
+
+    .drafts-heading {
+        display: flex;
+        align-items: center;
+    }
+
+    .drafts-heading-icon {
+        width: 46px;
+        height: 46px;
+        display: flex;
+        flex-shrink: 0;
+        align-items: center;
+        justify-content: center;
+        margin-right: 13px;
+        border: 1px solid rgba(255, 255, 255, 0.24);
+        border-radius: 13px;
+        background-color: rgba(255, 255, 255, 0.14);
+        font-size: 20px;
+    }
+
+    .drafts-heading h4 {
+        margin: 0;
+        color: #ffffff;
+        font-size: 20px;
+        font-weight: 600;
+    }
+
+    .drafts-heading p {
+        margin: 4px 0 0;
+        color: rgba(255, 255, 255, 0.78);
+        font-size: 12px;
+    }
+
+    .drafts-count {
+        padding: 7px 12px;
+        border: 1px solid rgba(255, 255, 255, 0.22);
+        border-radius: 20px;
+        background-color: rgba(255, 255, 255, 0.14);
+        color: #ffffff;
+        font-size: 12px;
+        white-space: nowrap;
+    }
+
+    .drafts-row {
+        display: flex;
+        align-items: center;
+        min-height: 74px;
+        padding: 0 20px;
+        border-bottom: 1px solid #efeff5;
+        background-color: #ffffff;
+        transition: all 0.2s ease;
+    }
+
+        .drafts-row:last-child {
+            border-bottom: none;
+        }
+
+        .drafts-row:hover {
+            background-color: #f7f6ff;
+            box-shadow: inset 3px 0 0 #716cff;
+        }
+
+    .drafts-icon {
+        width: 39px;
+        flex-shrink: 0;
+        color: #716cff;
+        font-size: 18px;
+    }
+
+    .drafts-message-link {
+        display: flex;
+        min-width: 0;
+        flex: 1;
+        align-items: center;
+        color: inherit;
+        text-decoration: none;
+    }
+
+        .drafts-message-link:hover {
+            color: inherit;
+            text-decoration: none;
+        }
+
+    .drafts-receiver {
+        display: flex;
+        overflow: hidden;
+        width: 200px;
+        flex-shrink: 0;
+        flex-direction: column;
+        padding-right: 20px;
+    }
+
+    .drafts-receiver-label {
+        margin-bottom: 2px;
+        color: #aaa8b7;
+        font-size: 10px;
+        font-weight: 600;
+        letter-spacing: 0.5px;
+        text-transform: uppercase;
+    }
+
+    .drafts-receiver-value {
+        overflow: hidden;
+        color: #555363;
+        font-size: 13px;
+        font-weight: 600;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    .drafts-message-content {
+        display: flex;
+        min-width: 0;
+        flex: 1;
+        align-items: center;
+        overflow: hidden;
+    }
+
+    .drafts-badge {
+        flex-shrink: 0;
+        margin-right: 10px;
+        padding: 4px 8px;
+        border-radius: 6px;
+        background-color: #f0efff;
+        color: #716cff;
+        font-size: 10px;
+        font-weight: 600;
+        text-transform: uppercase;
+    }
+
+    .drafts-text {
+        display: flex;
+        min-width: 0;
+        align-items: center;
+        overflow: hidden;
+        font-size: 13px;
+    }
+
+    .drafts-subject {
+        flex-shrink: 0;
+        color: #4f4d5d;
+        font-weight: 600;
+    }
+
+    .drafts-preview {
+        overflow: hidden;
+        margin-left: 5px;
+        color: #9896a5;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    .drafts-date {
+        min-width: 110px;
+        margin-left: 18px;
+        color: #858394;
+        font-size: 12px;
+        text-align: right;
+        white-space: nowrap;
+    }
+
+        .drafts-date i {
+            margin-right: 4px;
+            color: #716cff;
+        }
+
+    .drafts-empty-state {
+        padding: 70px 25px;
+        text-align: center;
+    }
+
+    .drafts-empty-icon {
+        width: 72px;
+        height: 72px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 16px;
+        border-radius: 50%;
+        background-color: #f0efff;
+        color: #716cff;
+        font-size: 27px;
+    }
+
+    .drafts-empty-state h5 {
+        margin-bottom: 7px;
+        color: #454352;
+        font-weight: 600;
+    }
+
+    .drafts-empty-state p {
+        margin-bottom: 18px;
+        color: #9492a1;
+        font-size: 13px;
+    }
+
+    .drafts-create-button {
+        padding: 10px 16px;
+        border: none;
+        border-radius: 9px;
+        background: linear-gradient( 135deg, #625df5, #8079ff );
+        color: #ffffff;
+    }
+
+        .drafts-create-button:hover {
+            color: #ffffff;
+            box-shadow: 0 7px 15px rgba(98, 93, 245, 0.24);
+            transform: translateY(-1px);
+        }
+
+    @@media (max-width: 900px) {
+        .drafts-receiver {
+            width: 150px;
+        }
+
+        .drafts-preview {
+            display: none;
+        }
+    }
+
+    @@media (max-width: 650px) {
+        .drafts-header {
+            padding-right: 16px;
+            padding-left: 16px;
+        }
+
+        .drafts-heading p,
+        .drafts-count,
+        .drafts-icon {
+            display: none;
+        }
+
+        .drafts-row {
+            padding: 12px 14px;
+        }
+
+        .drafts-message-link {
+            align-items: flex-start;
+            flex-direction: column;
+        }
+
+        .drafts-receiver {
+            width: 100%;
+            padding-right: 0;
+        }
+
+        .drafts-message-content {
+            width: 100%;
+            margin-top: 6px;
+        }
+
+        .drafts-date {
+            min-width: auto;
+            margin: 6px 0 0;
+            text-align: left;
+        }
+    }
+</style>

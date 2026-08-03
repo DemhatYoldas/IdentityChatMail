@@ -4,103 +4,245 @@
     Layout = "_MessageLayout";
 }
 
-<div class="trash-list">
+<div class="trash-page">
 
-    @if (Model == null || !Model.Any())
-    {
-        <div class="alert alert-info">
-            Çöp kutusunda mesaj bulunmuyor.
+    <!-- Sayfa başlığı -->
+    <div class="trash-header">
+
+        <div class="trash-heading">
+
+            <div class="trash-heading-icon">
+                <i class="ti-trash"></i>
+            </div>
+
+            <div>
+                <h4>Çöp Kutusu</h4>
+                <p>Silinen mesajları geri yükleyebilir veya kalıcı olarak silebilirsiniz.</p>
+            </div>
+
         </div>
-    }
-    else
-    {
-        @foreach (var item in Model)
-        {
-            <div class="trash-message">
 
-                <div class="trash-icon">
+        <span class="trash-count">
+            @(Model?.Count ?? 0) mesaj
+        </span>
+
+    </div>
+
+    <!-- Mesaj listesi -->
+    <div class="trash-list">
+
+        @if (Model == null || !Model.Any())
+        {
+            <div class="trash-empty-state">
+
+                <div class="trash-empty-icon">
                     <i class="ti-trash"></i>
                 </div>
 
-                <div class="trash-content">
+                <h5>Çöp kutusu boş</h5>
 
-                    <a asp-controller="Message"
-                       asp-action="MessageDetails"
-                       asp-route-id="@item.MessageId"
-                       class="trash-subject">
+                <p>
+                    Çöp kutusuna taşıdığınız mesajlar burada görüntülenecek.
+                </p>
 
-                        @item.Subject
-                    </a>
+                <a asp-controller="Message"
+                   asp-action="Inbox"
+                   class="btn trash-inbox-button">
 
-                    <span class="trash-date">
-                        @item.SendDate.ToString(
-                            "dd MMMM",
-                            System.Globalization.CultureInfo.GetCultureInfo("tr-TR"))
-                    </span>
-
-                </div>
-
-                <div class="trash-actions">
-
-                    <a asp-controller="Message"
-                       asp-action="MessageDetails"
-                       asp-route-id="@item.MessageId"
-                       class="btn btn-sm btn-primary"
-                       title="Mesajı görüntüle">
-
-                        <i class="ti-eye"></i>
-                        Detay
-                    </a>
-
-                    <a asp-controller="Message"
-                       asp-action="RestoreMessage"
-                       asp-route-id="@item.MessageId"
-                       class="btn btn-sm btn-success"
-                       onclick="return confirm('Mesaj geri yüklensin mi?')">
-
-                        <i class="ti-back-left"></i>
-                        Geri Yükle
-                    </a>
-
-                    <a asp-controller="Message"
-                       asp-action="DeletePermanently"
-                       asp-route-id="@item.MessageId"
-                       class="btn btn-sm btn-danger"
-                       onclick="return confirm('Mesaj kalıcı olarak silinsin mi? Bu işlem geri alınamaz.')">
-
-                        <i class="ti-trash"></i>
-                        Kalıcı Sil
-                    </a>
-
-                </div>
+                    <i class="fa fa-inbox mr-1"></i>
+                    Gelen Kutusuna Git
+                </a>
 
             </div>
         }
-    }
+        else
+        {
+            @foreach (var item in Model)
+            {
+                <div class="trash-row">
+
+                    <div class="trash-row-icon">
+                        <i class="ti-trash"></i>
+                    </div>
+
+                    <div class="trash-content">
+
+                        <a asp-controller="Message"
+                           asp-action="MessageDetails"
+                           asp-route-id="@item.MessageId"
+                           class="trash-message-link">
+
+                            <div class="trash-address">
+
+                                <span class="trash-address-label">
+                                    Gönderen
+                                </span>
+
+                                <span class="trash-address-value">
+                                    @item.SenderMail
+                                </span>
+
+                            </div>
+
+                            <div class="trash-message-content">
+
+                                <span class="trash-subject">
+
+                                    @(string.IsNullOrWhiteSpace(item.Subject)
+                                        ? "(Konu bulunmuyor)"
+                                        : item.Subject)
+
+                                </span>
+
+                                <span class="trash-preview">
+                                    — @(string.IsNullOrWhiteSpace(item.MessageDetail)
+                                                                            ? "Mesaj içeriği bulunmuyor"
+                                                                            : item.MessageDetail)
+                                </span>
+
+                            </div>
+
+                            <div class="trash-date">
+
+                                <i class="ti-time"></i>
+
+                                @item.SendDate.ToString(
+                                    "dd MMMM",
+                                    System.Globalization.CultureInfo.GetCultureInfo("tr-TR"))
+
+                            </div>
+
+                        </a>
+
+                    </div>
+
+                    <!-- İşlem butonları -->
+                    <div class="trash-actions">
+
+                        <a asp-controller="Message"
+                           asp-action="MessageDetails"
+                           asp-route-id="@item.MessageId"
+                           class="trash-action-button trash-detail-button"
+                           title="Mesajı görüntüle">
+
+                            <i class="ti-eye"></i>
+                            <span>Detay</span>
+                        </a>
+
+                        <a asp-controller="Message"
+                           asp-action="RestoreMessage"
+                           asp-route-id="@item.MessageId"
+                           class="trash-action-button trash-restore-button"
+                           title="Mesajı geri yükle"
+                           onclick="return confirm('Mesaj geri yüklensin mi?')">
+
+                            <i class="ti-back-left"></i>
+                            <span>Geri Yükle</span>
+                        </a>
+
+                        <a asp-controller="Message"
+                           asp-action="DeletePermanently"
+                           asp-route-id="@item.MessageId"
+                           class="trash-action-button trash-delete-button"
+                           title="Mesajı kalıcı olarak sil"
+                           onclick="return confirm('Mesaj kalıcı olarak silinsin mi? Bu işlem geri alınamaz.')">
+
+                            <i class="ti-trash"></i>
+                            <span>Kalıcı Sil</span>
+                        </a>
+
+                    </div>
+
+                </div>
+            }
+        }
+
+    </div>
 
 </div>
 
 <style>
-    .trash-list {
-        margin-top: 15px;
+    .trash-page {
+        overflow: hidden;
         width: 100%;
+        border: 1px solid #ececf4;
+        border-radius: 16px;
+        background-color: #ffffff;
+        box-shadow: 0 10px 30px rgba(35, 31, 91, 0.06);
     }
 
-    .trash-message {
+    .trash-header {
         display: flex;
         align-items: center;
-        min-height: 75px;
-        padding: 12px 18px;
-        border-bottom: 1px solid #eeeeee;
-        transition: background-color 0.2s ease;
+        justify-content: space-between;
+        padding: 21px 24px;
+        background: linear-gradient( 135deg, #625df5 0%, #8b6df6 100% );
+        color: #ffffff;
     }
 
-    .trash-message:hover {
-        background-color: #f8f8fc;
+    .trash-heading {
+        display: flex;
+        align-items: center;
     }
 
-    .trash-icon {
-        width: 35px;
+    .trash-heading-icon {
+        width: 46px;
+        height: 46px;
+        display: flex;
+        flex-shrink: 0;
+        align-items: center;
+        justify-content: center;
+        margin-right: 13px;
+        border: 1px solid rgba(255, 255, 255, 0.24);
+        border-radius: 13px;
+        background-color: rgba(255, 255, 255, 0.14);
+        color: #ffb6b9;
+        font-size: 20px;
+    }
+
+    .trash-heading h4 {
+        margin: 0;
+        color: #ffffff;
+        font-size: 20px;
+        font-weight: 600;
+    }
+
+    .trash-heading p {
+        margin: 4px 0 0;
+        color: rgba(255, 255, 255, 0.78);
+        font-size: 12px;
+    }
+
+    .trash-count {
+        padding: 7px 12px;
+        border: 1px solid rgba(255, 255, 255, 0.22);
+        border-radius: 20px;
+        background-color: rgba(255, 255, 255, 0.14);
+        color: #ffffff;
+        font-size: 12px;
+        white-space: nowrap;
+    }
+
+    .trash-row {
+        display: flex;
+        align-items: center;
+        min-height: 82px;
+        padding: 10px 18px;
+        border-bottom: 1px solid #efeff5;
+        transition: all 0.2s ease;
+    }
+
+        .trash-row:last-child {
+            border-bottom: none;
+        }
+
+        .trash-row:hover {
+            background-color: #fff8f8;
+            box-shadow: inset 3px 0 0 #ff5c62;
+        }
+
+    .trash-row-icon {
+        width: 36px;
         flex-shrink: 0;
         color: #ff5c62;
         font-size: 17px;
@@ -108,62 +250,269 @@
 
     .trash-content {
         display: flex;
-        align-items: center;
         min-width: 0;
         flex: 1;
     }
 
-    .trash-subject {
-        overflow: hidden;
-        color: #6b7280;
-        font-size: 16px;
+    .trash-message-link {
+        display: flex;
+        min-width: 0;
+        flex: 1;
+        align-items: center;
+        color: inherit;
         text-decoration: none;
+    }
+
+        .trash-message-link:hover {
+            color: inherit;
+            text-decoration: none;
+        }
+
+    .trash-address {
+        display: flex;
+        overflow: hidden;
+        width: 180px;
+        flex-shrink: 0;
+        flex-direction: column;
+        padding-right: 18px;
+    }
+
+    .trash-address-label {
+        margin-bottom: 2px;
+        color: #aaa8b7;
+        font-size: 10px;
+        font-weight: 600;
+        letter-spacing: 0.5px;
+        text-transform: uppercase;
+    }
+
+    .trash-address-value {
+        overflow: hidden;
+        color: #555363;
+        font-size: 12px;
+        font-weight: 600;
         text-overflow: ellipsis;
         white-space: nowrap;
     }
 
-    .trash-subject:hover {
-        color: #716cff;
-        text-decoration: none;
+    .trash-message-content {
+        display: flex;
+        min-width: 0;
+        flex: 1;
+        align-items: center;
+        overflow: hidden;
+        font-size: 13px;
+    }
+
+    .trash-subject {
+        flex-shrink: 0;
+        color: #535160;
+        font-weight: 600;
+    }
+
+    .trash-preview {
+        overflow: hidden;
+        margin-left: 5px;
+        color: #9896a5;
+        text-overflow: ellipsis;
+        white-space: nowrap;
     }
 
     .trash-date {
-        margin-left: auto;
-        padding: 0 25px;
-        color: #718096;
+        min-width: 105px;
+        margin-left: 15px;
+        color: #858394;
+        font-size: 12px;
+        text-align: right;
         white-space: nowrap;
     }
+
+        .trash-date i {
+            margin-right: 4px;
+            color: #ff777c;
+        }
 
     .trash-actions {
         display: flex;
         flex-shrink: 0;
+        align-items: center;
         gap: 6px;
+        margin-left: 16px;
     }
 
-    .trash-actions .btn {
+    .trash-action-button {
         display: inline-flex;
         align-items: center;
-        gap: 5px;
+        justify-content: center;
+        min-height: 36px;
+        padding: 7px 10px;
+        border-radius: 8px;
+        font-size: 11px;
+        font-weight: 500;
+        transition: all 0.2s ease;
     }
 
-    @@media (max-width: 900px) {
-        .trash-message {
-            align-items: flex-start;
+        .trash-action-button i {
+            margin-right: 5px;
         }
 
-        .trash-content {
-            flex-direction: column;
+    .trash-detail-button {
+        border: 1px solid #dcdbea;
+        background-color: #f7f6fc;
+        color: #666475;
+    }
+
+        .trash-detail-button:hover {
+            border-color: #716cff;
+            background-color: #f0efff;
+            color: #625df5;
+            text-decoration: none;
+        }
+
+    .trash-restore-button {
+        border: 1px solid #a9e3c8;
+        background-color: #effbf5;
+        color: #269967;
+    }
+
+        .trash-restore-button:hover {
+            border-color: #32b77d;
+            background-color: #32b77d;
+            color: #ffffff;
+            text-decoration: none;
+        }
+
+    .trash-delete-button {
+        border: 1px solid #ffb8bb;
+        background-color: #fff3f3;
+        color: #e65359;
+    }
+
+        .trash-delete-button:hover {
+            border-color: #ff5c62;
+            background-color: #ff5c62;
+            color: #ffffff;
+            text-decoration: none;
+        }
+
+    .trash-empty-state {
+        padding: 70px 25px;
+        text-align: center;
+    }
+
+    .trash-empty-icon {
+        width: 72px;
+        height: 72px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 16px;
+        border-radius: 50%;
+        background-color: #fff1f1;
+        color: #ff5c62;
+        font-size: 27px;
+    }
+
+    .trash-empty-state h5 {
+        margin-bottom: 7px;
+        color: #454352;
+        font-weight: 600;
+    }
+
+    .trash-empty-state p {
+        margin-bottom: 18px;
+        color: #9492a1;
+        font-size: 13px;
+    }
+
+    .trash-inbox-button {
+        padding: 10px 16px;
+        border: none;
+        border-radius: 9px;
+        background: linear-gradient( 135deg, #625df5, #8079ff );
+        color: #ffffff;
+    }
+
+        .trash-inbox-button:hover {
+            color: #ffffff;
+            box-shadow: 0 7px 15px rgba(98, 93, 245, 0.24);
+            transform: translateY(-1px);
+        }
+
+    @@media (max-width: 1150px) {
+        .trash-address {
+            display: none;
+        }
+
+        .trash-preview {
+            display: none;
+        }
+
+        .trash-action-button span {
+            display: none;
+        }
+
+        .trash-action-button i {
+            margin-right: 0;
+        }
+
+        .trash-action-button {
+            width: 36px;
+            padding: 7px;
+        }
+    }
+
+    @@media (max-width: 700px) {
+        .trash-header {
+            padding-right: 16px;
+            padding-left: 16px;
+        }
+
+        .trash-heading p,
+        .trash-count,
+        .trash-row-icon {
+            display: none;
+        }
+
+        .trash-row {
             align-items: flex-start;
+            flex-direction: column;
+            padding: 14px;
+        }
+
+        .trash-content,
+        .trash-message-link,
+        .trash-message-content {
+            width: 100%;
+        }
+
+        .trash-message-link {
+            align-items: flex-start;
+            flex-direction: column;
         }
 
         .trash-date {
-            margin: 5px 0 0;
-            padding: 0;
+            min-width: auto;
+            margin: 6px 0 0;
+            text-align: left;
         }
 
         .trash-actions {
-            flex-direction: column;
-            margin-left: 10px;
+            width: 100%;
+            margin: 12px 0 0;
         }
+
+        .trash-action-button {
+            width: auto;
+            flex: 1;
+        }
+
+            .trash-action-button span {
+                display: inline;
+            }
+
+            .trash-action-button i {
+                margin-right: 5px;
+            }
     }
 </style>

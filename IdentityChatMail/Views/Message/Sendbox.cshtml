@@ -4,36 +4,395 @@
     Layout = "_MessageLayout";
 }
 
+<div class="sendbox-page">
 
+    <div class="sendbox-header">
 
+        <div class="sendbox-heading">
 
+            <div class="sendbox-heading-icon">
+                <i class="fa fa-paper-plane"></i>
+            </div>
 
-<div class="email-list m-t-15">
-    <div class="email-list m-t-15">
+            <div>
+                <h4>Gönderilen Mesajlar</h4>
+                <p>Gönderdiğiniz mesajları görüntüleyin.</p>
+            </div>
 
-        @foreach (var item in Model)
+        </div>
+
+        <span class="sendbox-count">
+            @(Model?.Count ?? 0) mesaj
+        </span>
+
+    </div>
+
+    <div class="sendbox-list">
+
+        @if (Model == null || !Model.Any())
         {
-            <div class="message">
-                <a href="@Url.Action("MessageDetails", "Message", new { id = item.MessageId })">
-                    <div class="col-mail col-mail-1">
-                        <div class="email-checkbox">
-                            <input type="checkbox" id="chk_@item.MessageId">
-                            <label class="toggle" for="chk_@item.MessageId"></label>
-                        </div>
-                        <span class="star-toggle ti-star"></span>
-                    </div>
+            <div class="sendbox-empty-state">
 
-                    <div class="col-mail col-mail-2">
-                        <div class="subject">
-                            @item.Subject
-                        </div>
-                        <div class="date">
-                            @item.SendDate.ToString("dd MMMM ", System.Globalization.CultureInfo.GetCultureInfo("tr-TR"))
-                        </div>
-                    </div>
+                <div class="sendbox-empty-icon">
+                    <i class="fa fa-paper-plane"></i>
+                </div>
+
+                <h5>Gönderilmiş mesaj bulunmuyor</h5>
+
+                <p>
+                    Gönderdiğiniz mesajlar burada görüntülenecek.
+                </p>
+
+                <a asp-controller="Message"
+                   asp-action="CreateMessage"
+                   class="btn sendbox-create-button">
+
+                    <i class="fa fa-plus mr-1"></i>
+                    Yeni Mesaj Oluştur
                 </a>
+
             </div>
         }
+        else
+        {
+            @foreach (var item in Model)
+            {
+                <div class="sendbox-row">
+
+                    <div class="sendbox-status-icon"
+                         title="Gönderildi">
+
+                        <i class="fa fa-paper-plane"></i>
+                    </div>
+
+                    <a asp-controller="Message"
+                       asp-action="ToggleImportant"
+                       asp-route-id="@item.MessageId"
+                       class="sendbox-star @(item.SenderIsImportant ? "sendbox-star-active" : "")"
+                       title="@(item.SenderIsImportant ? "Önemden çıkar" : "Önemli yap")">
+
+                        <i class="ti-star"></i>
+                    </a>
+
+                    <a asp-controller="Message"
+                       asp-action="MessageDetails"
+                       asp-route-id="@item.MessageId"
+                       class="sendbox-message-link">
+
+                        <div class="sendbox-receiver">
+
+                            <span class="sendbox-receiver-label">
+                                Alıcı
+                            </span>
+
+                            <span class="sendbox-receiver-email">
+                                @item.ReceiverEmail
+                            </span>
+
+                        </div>
+
+                        <div class="sendbox-message-content">
+
+                            <span class="sendbox-subject">
+                                @(string.IsNullOrWhiteSpace(item.Subject)
+                                    ? "(Konu bulunmuyor)"
+                                    : item.Subject)
+                            </span>
+
+                            <span class="sendbox-preview">
+                                — @item.MessageDetail
+                            </span>
+
+                        </div>
+
+                        <div class="sendbox-date">
+
+                            <i class="ti-check mr-1"></i>
+
+                            @item.SendDate.ToString(
+                                "dd MMMM",
+                                System.Globalization.CultureInfo.GetCultureInfo("tr-TR"))
+
+                        </div>
+
+                    </a>
+
+                </div>
+            }
+        }
+
     </div>
 
 </div>
+
+<style>
+    .sendbox-page {
+        overflow: hidden;
+        width: 100%;
+        border: 1px solid #ececf4;
+        border-radius: 16px;
+        background-color: #ffffff;
+        box-shadow: 0 10px 30px rgba(35, 31, 91, 0.06);
+    }
+
+    .sendbox-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 21px 24px;
+        background: linear-gradient( 135deg, #625df5 0%, #8b6df6 100% );
+        color: #ffffff;
+    }
+
+    .sendbox-heading {
+        display: flex;
+        align-items: center;
+    }
+
+    .sendbox-heading-icon {
+        width: 46px;
+        height: 46px;
+        display: flex;
+        flex-shrink: 0;
+        align-items: center;
+        justify-content: center;
+        margin-right: 13px;
+        border: 1px solid rgba(255, 255, 255, 0.24);
+        border-radius: 13px;
+        background-color: rgba(255, 255, 255, 0.14);
+        font-size: 19px;
+    }
+
+    .sendbox-heading h4 {
+        margin: 0;
+        color: #ffffff;
+        font-size: 20px;
+        font-weight: 600;
+    }
+
+    .sendbox-heading p {
+        margin: 4px 0 0;
+        color: rgba(255, 255, 255, 0.78);
+        font-size: 12px;
+    }
+
+    .sendbox-count {
+        padding: 7px 12px;
+        border: 1px solid rgba(255, 255, 255, 0.22);
+        border-radius: 20px;
+        background-color: rgba(255, 255, 255, 0.14);
+        color: #ffffff;
+        font-size: 12px;
+        white-space: nowrap;
+    }
+
+    .sendbox-row {
+        display: flex;
+        align-items: center;
+        min-height: 72px;
+        padding: 0 20px;
+        border-bottom: 1px solid #efeff5;
+        transition: all 0.2s ease;
+    }
+
+        .sendbox-row:last-child {
+            border-bottom: none;
+        }
+
+        .sendbox-row:hover {
+            background-color: #f7f6ff;
+            box-shadow: inset 3px 0 0 #716cff;
+        }
+
+    .sendbox-status-icon {
+        width: 30px;
+        flex-shrink: 0;
+        color: #716cff;
+        font-size: 14px;
+    }
+
+    .sendbox-star {
+        width: 31px;
+        flex-shrink: 0;
+        color: #c6c4cf;
+        font-size: 17px;
+        text-decoration: none;
+        transition: all 0.2s ease;
+    }
+
+        .sendbox-star:hover,
+        .sendbox-star-active {
+            color: #f5b942;
+            text-decoration: none;
+            transform: scale(1.08);
+        }
+
+    .sendbox-message-link {
+        display: flex;
+        min-width: 0;
+        flex: 1;
+        align-items: center;
+        color: inherit;
+        text-decoration: none;
+    }
+
+        .sendbox-message-link:hover {
+            color: inherit;
+            text-decoration: none;
+        }
+
+    .sendbox-receiver {
+        display: flex;
+        overflow: hidden;
+        width: 210px;
+        flex-shrink: 0;
+        flex-direction: column;
+        padding-right: 20px;
+    }
+
+    .sendbox-receiver-label {
+        margin-bottom: 2px;
+        color: #aaa8b7;
+        font-size: 10px;
+        font-weight: 600;
+        letter-spacing: 0.5px;
+        text-transform: uppercase;
+    }
+
+    .sendbox-receiver-email {
+        overflow: hidden;
+        color: #555363;
+        font-size: 13px;
+        font-weight: 600;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    .sendbox-message-content {
+        display: flex;
+        min-width: 0;
+        flex: 1;
+        align-items: center;
+        overflow: hidden;
+        font-size: 13px;
+    }
+
+    .sendbox-subject {
+        flex-shrink: 0;
+        color: #535161;
+        font-weight: 600;
+    }
+
+    .sendbox-preview {
+        overflow: hidden;
+        margin-left: 5px;
+        color: #9896a5;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    .sendbox-date {
+        min-width: 115px;
+        margin-left: 18px;
+        color: #858394;
+        font-size: 12px;
+        text-align: right;
+        white-space: nowrap;
+    }
+
+        .sendbox-date i {
+            color: #32b77d;
+        }
+
+    .sendbox-empty-state {
+        padding: 70px 25px;
+        text-align: center;
+    }
+
+    .sendbox-empty-icon {
+        width: 70px;
+        height: 70px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 16px;
+        border-radius: 50%;
+        background-color: #f0efff;
+        color: #716cff;
+        font-size: 25px;
+    }
+
+    .sendbox-empty-state h5 {
+        margin-bottom: 7px;
+        color: #454352;
+        font-weight: 600;
+    }
+
+    .sendbox-empty-state p {
+        margin-bottom: 18px;
+        color: #9492a1;
+        font-size: 13px;
+    }
+
+    .sendbox-create-button {
+        padding: 10px 16px;
+        border: none;
+        border-radius: 9px;
+        background: linear-gradient( 135deg, #625df5, #8079ff );
+        color: #ffffff;
+    }
+
+        .sendbox-create-button:hover {
+            color: #ffffff;
+            box-shadow: 0 7px 15px rgba(98, 93, 245, 0.24);
+            transform: translateY(-1px);
+        }
+
+    @@media (max-width: 900px) {
+        .sendbox-receiver {
+            width: 150px;
+        }
+
+        .sendbox-preview {
+            display: none;
+        }
+    }
+
+    @@media (max-width: 650px) {
+        .sendbox-header {
+            padding-right: 16px;
+            padding-left: 16px;
+        }
+
+        .sendbox-heading p,
+        .sendbox-count,
+        .sendbox-status-icon {
+            display: none;
+        }
+
+        .sendbox-row {
+            padding: 12px 14px;
+        }
+
+        .sendbox-message-link {
+            align-items: flex-start;
+            flex-direction: column;
+        }
+
+        .sendbox-receiver {
+            width: 100%;
+            padding-right: 0;
+        }
+
+        .sendbox-message-content {
+            width: 100%;
+            margin-top: 5px;
+        }
+
+        .sendbox-date {
+            min-width: auto;
+            margin: 5px 0 0;
+            text-align: left;
+        }
+    }
+</style>

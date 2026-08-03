@@ -4,73 +4,118 @@
     Layout = "_MessageLayout";
 }
 
+<div class="compose-page">
 
-<div class="compose-content mt-3">
+    <div class="compose-header">
+
+        <div class="compose-header-icon">
+            <i class="ti-pencil-alt"></i>
+        </div>
+
+        <div>
+            <h4>Yeni Mesaj</h4>
+            <p>Mesajınızı hazırlayın ve alıcınıza gönderin.</p>
+        </div>
+
+    </div>
 
     <form asp-controller="Message"
           asp-action="CreateMessage"
-          method="post">
+          method="post"
+          class="compose-form">
 
         <div asp-validation-summary="ModelOnly"
-             class="text-danger">
+             class="alert alert-danger compose-validation">
         </div>
 
-        <div class="form-group">
+        <div class="form-group compose-form-group">
+
+            <label asp-for="ReceiverEmail"
+                   class="compose-label">
+                <i class="ti-email"></i>
+                Alıcı
+            </label>
+
             <input type="email"
-                   class="form-control bg-transparent"
-                   placeholder="E-posta adresi"
-                   asp-for="ReceiverEmail" />
+                   asp-for="ReceiverEmail"
+                   class="form-control compose-control"
+                   placeholder="ornek@email.com" />
 
             <span asp-validation-for="ReceiverEmail"
-                  class="text-danger">
+                  class="text-danger compose-error">
             </span>
+
         </div>
 
-        <div class="form-group">
+        <div class="form-group compose-form-group">
+
+            <label asp-for="Subject"
+                   class="compose-label">
+                <i class="ti-tag"></i>
+                Konu
+            </label>
+
             <input type="text"
-                   class="form-control bg-transparent"
-                   placeholder="Konu"
-                   asp-for="Subject" />
+                   asp-for="Subject"
+                   class="form-control compose-control"
+                   placeholder="Mesajınızın konusu" />
 
             <span asp-validation-for="Subject"
-                  class="text-danger">
+                  class="text-danger compose-error">
             </span>
+
         </div>
 
-        <div class="form-group">
-            <textarea class="textarea_editor form-control bg-light"
-                      rows="15"
-                      asp-for="MessageDetail"
-                      placeholder="Mesajınızı yazınız...">
-            </textarea>
+        <div class="form-group compose-form-group">
+
+            <label asp-for="MessageDetail"
+                   class="compose-label">
+                <i class="ti-align-left"></i>
+                Mesaj
+            </label>
+
+            <textarea asp-for="MessageDetail"
+                      class="form-control compose-control compose-textarea"
+                      rows="12"
+                      placeholder="Mesajınızı buraya yazınız..."></textarea>
 
             <span asp-validation-for="MessageDetail"
-                  class="text-danger">
+                  class="text-danger compose-error">
             </span>
+
         </div>
 
-        <div class="d-flex flex-wrap align-items-center mt-3">
+        <div class="compose-footer">
 
-            <button type="submit"
-                    class="btn btn-primary mr-2 mb-2">
-                <i class="ti-location-arrow mr-1"></i>
-                Gönder
-            </button>
+            <div class="compose-hint">
+                <i class="ti-info-alt"></i>
+                Mesajınızı gönderebilir veya taslak olarak saklayabilirsiniz.
+            </div>
 
-            <button type="submit"
-                    asp-controller="Message"
-                    asp-action="SaveDraft"
-                    class="btn btn-secondary mr-2 mb-2">
-                <i class="ti-save mr-1"></i>
-                Taslak Olarak Kaydet
-            </button>
+            <div class="compose-actions">
 
-            <a asp-controller="Message"
-               asp-action="Inbox"
-               class="btn btn-dark mb-2">
-                <i class="ti-close mr-1"></i>
-                İptal
-            </a>
+                <a asp-controller="Message"
+                   asp-action="Inbox"
+                   class="btn compose-btn compose-cancel-btn">
+                    <i class="ti-close"></i>
+                    İptal
+                </a>
+
+                <button type="submit"
+                        asp-controller="Message"
+                        asp-action="SaveDraft"
+                        class="btn compose-btn compose-draft-btn">
+                    <i class="ti-save"></i>
+                    Taslak Olarak Kaydet
+                </button>
+
+                <button type="submit"
+                        class="btn compose-btn compose-send-btn">
+                    <i class="ti-location-arrow"></i>
+                    Gönder
+                </button>
+
+            </div>
 
         </div>
 
@@ -78,3 +123,210 @@
 
 </div>
 
+<style>
+    .compose-page {
+        overflow: hidden;
+        width: 100%;
+        border: 1px solid #ececf4;
+        border-radius: 16px;
+        background-color: #ffffff;
+        box-shadow: 0 10px 30px rgba(35, 31, 91, 0.06);
+    }
+
+    .compose-header {
+        display: flex;
+        align-items: center;
+        padding: 22px 25px;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.18);
+        background: linear-gradient(135deg, #625df5 0%, #8b6df6 100%);
+        color: #ffffff;
+    }
+
+    .compose-header-icon {
+        width: 48px;
+        height: 48px;
+        display: flex;
+        flex-shrink: 0;
+        align-items: center;
+        justify-content: center;
+        margin-right: 14px;
+        border: 1px solid rgba(255, 255, 255, 0.24);
+        border-radius: 13px;
+        background-color: rgba(255, 255, 255, 0.14);
+        font-size: 21px;
+    }
+
+    .compose-header h4 {
+        margin: 0;
+        color: #ffffff;
+        font-size: 20px;
+        font-weight: 600;
+    }
+
+    .compose-header p {
+        margin: 4px 0 0;
+        color: rgba(255, 255, 255, 0.78);
+        font-size: 13px;
+    }
+
+    .compose-form {
+        padding: 25px;
+    }
+
+    .compose-validation:empty {
+        display: none;
+    }
+
+    .compose-form-group {
+        margin-bottom: 20px;
+    }
+
+    .compose-label {
+        display: flex;
+        align-items: center;
+        margin-bottom: 8px;
+        color: #414052;
+        font-size: 13px;
+        font-weight: 600;
+    }
+
+        .compose-label i {
+            width: 20px;
+            margin-right: 5px;
+            color: #716cff;
+        }
+
+    .compose-control {
+        min-height: 46px;
+        padding: 11px 14px;
+        border: 1px solid #e4e3ed;
+        border-radius: 10px;
+        background-color: #fafafe;
+        color: #3c3b4d;
+        transition: all 0.2s ease;
+    }
+
+        .compose-control:focus {
+            border-color: #716cff;
+            background-color: #ffffff;
+            box-shadow: 0 0 0 3px rgba(113, 108, 255, 0.12);
+        }
+
+    .compose-textarea {
+        min-height: 230px;
+        line-height: 1.7;
+        resize: vertical;
+    }
+
+    .compose-error {
+        display: block;
+        margin-top: 6px;
+        font-size: 12px;
+    }
+
+    .compose-footer {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-top: 8px;
+        padding-top: 20px;
+        border-top: 1px solid #eeeef5;
+    }
+
+    .compose-hint {
+        color: #9291a1;
+        font-size: 12px;
+    }
+
+        .compose-hint i {
+            margin-right: 5px;
+            color: #716cff;
+        }
+
+    .compose-actions {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .compose-btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 42px;
+        padding: 9px 15px;
+        border: none;
+        border-radius: 9px;
+        font-size: 13px;
+        font-weight: 500;
+        transition: all 0.2s ease;
+    }
+
+        .compose-btn i {
+            margin-right: 7px;
+        }
+
+    .compose-send-btn {
+        background: linear-gradient(135deg, #625df5, #8079ff);
+        box-shadow: 0 6px 14px rgba(98, 93, 245, 0.22);
+        color: #ffffff;
+    }
+
+        .compose-send-btn:hover {
+            box-shadow: 0 9px 18px rgba(98, 93, 245, 0.30);
+            color: #ffffff;
+            transform: translateY(-1px);
+        }
+
+    .compose-draft-btn {
+        border: 1px solid #dddceb;
+        background-color: #f2f1f8;
+        color: #636174;
+    }
+
+        .compose-draft-btn:hover {
+            border-color: #cbc9e2;
+            background-color: #e9e8f2;
+            color: #4e4c5e;
+        }
+
+    .compose-cancel-btn {
+        border: 1px solid #ecebf2;
+        background-color: #ffffff;
+        color: #888796;
+    }
+
+        .compose-cancel-btn:hover {
+            border-color: #ffb8bb;
+            background-color: #fff3f3;
+            color: #e65359;
+        }
+
+    @@media (max-width: 900px) {
+        .compose-footer {
+            align-items: flex-start;
+            flex-direction: column;
+        }
+
+        .compose-actions {
+            width: 100%;
+            margin-top: 15px;
+            flex-wrap: wrap;
+        }
+    }
+
+    @@media (max-width: 576px) {
+        .compose-header,
+        .compose-form {
+            padding: 18px;
+        }
+
+        .compose-actions {
+            flex-direction: column-reverse;
+        }
+
+        .compose-btn {
+            width: 100%;
+        }
+    }
+</style>

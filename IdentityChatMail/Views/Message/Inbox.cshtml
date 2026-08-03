@@ -4,115 +4,502 @@
     Layout = "_MessageLayout";
 
     var searchTerm = ViewBag.SearchTerm as string;
+    var unreadCount = Model?.Count(x => !x.IsRead) ?? 0;
 }
 
-<!-- Arama alanı -->
-<div class="mb-3">
+<div class="inbox-page">
 
-    <form asp-controller="Message"
-          asp-action="Inbox"
-          method="get">
+    <div class="inbox-header">
 
-        <div class="input-group">
+        <div class="inbox-heading">
 
-            <input type="text"
-                   name="searchTerm"
-                   value="@searchTerm"
-                   class="form-control"
-                   placeholder="Konu, içerik veya gönderen ara..." />
+            <div class="inbox-heading-icon">
+                <i class="fa fa-inbox"></i>
+            </div>
 
-            <div class="input-group-append">
+            <div>
+                <h4>Gelen Kutusu</h4>
 
-                <button type="submit"
-                        class="btn btn-primary">
+                <p>
+                    @(unreadCount > 0
+                        ? $"{unreadCount} okunmamış mesajınız var."
+                        : "Tüm mesajlarınızı görüntüleyin.")
+                </p>
+            </div>
 
-                    <i class="ti-search"></i>
-                    Ara
-                </button>
+        </div>
+
+        <span class="inbox-count">
+            @(Model?.Count ?? 0) mesaj
+        </span>
+
+    </div>
+
+    <!-- Arama alanı -->
+    <div class="inbox-toolbar">
+
+        <form asp-controller="Message"
+              asp-action="Inbox"
+              method="get"
+              class="inbox-search-form">
+
+            <div class="inbox-search-box">
+
+                <i class="ti-search"></i>
+
+                <input type="text"
+                       name="searchTerm"
+                       value="@searchTerm"
+                       placeholder="Konu, içerik veya gönderen ara..."
+                       autocomplete="off" />
 
                 @if (!string.IsNullOrWhiteSpace(searchTerm))
                 {
                     <a asp-controller="Message"
                        asp-action="Inbox"
-                       class="btn btn-secondary">
+                       class="inbox-clear-search"
+                       title="Aramayı temizle">
 
                         <i class="ti-close"></i>
-                        Temizle
                     </a>
                 }
 
+                <button type="submit"
+                        class="inbox-search-button">
+                    Ara
+                </button>
+
             </div>
 
-        </div>
+        </form>
 
-    </form>
+    </div>
 
-</div>
+    <!-- Mesaj listesi -->
+    <div class="inbox-list">
 
-<!-- Mesaj listesi -->
-<div class="email-list m-t-15">
-
-    @if (Model == null || !Model.Any())
-    {
-        <div class="alert alert-info">
-
-            @if (!string.IsNullOrWhiteSpace(searchTerm))
-            {
-                <span>
-                    “<strong>@searchTerm</strong>” aramasıyla eşleşen mesaj bulunamadı.
-                </span>
-            }
-            else
-            {
-                <span>Gelen kutusunda mesaj bulunmuyor.</span>
-            }
-
-        </div>
-    }
-    else
-    {
-        @foreach (var item in Model)
+        @if (Model == null || !Model.Any())
         {
-            <div class="message">
+            <div class="inbox-empty-state">
 
-                <a href="@Url.Action(
-                                               "MessageDetails",
-                                               "Message",
-                                               new { id = item.MessageId })">
+                <div class="inbox-empty-icon">
+                    <i class="ti-email"></i>
+                </div>
 
-                    <div class="col-mail col-mail-1">
+                @if (!string.IsNullOrWhiteSpace(searchTerm))
+                {
+                    <h5>Sonuç bulunamadı</h5>
 
-                        <div class="email-checkbox">
-                            <input type="checkbox"
-                                   id="chk_@item.MessageId" />
+                    <p>
+                        “<strong>@searchTerm</strong>” aramasıyla
+                        eşleşen mesaj bulunamadı.
+                    </p>
 
-                            <label class="toggle"
-                                   for="chk_@item.MessageId">
-                            </label>
-                        </div>
+                    <a asp-controller="Message"
+                       asp-action="Inbox"
+                       class="btn inbox-empty-button">
 
-                        <span class="star-toggle ti-star text-warning"></span>
+                        Aramayı Temizle
+                    </a>
+                }
+                else
+                {
+                    <h5>Gelen kutunuz boş</h5>
+                    <p>Yeni mesajlarınız burada görüntülenecek.</p>
+                }
+
+            </div>
+        }
+        else
+        {
+            @foreach (var item in Model)
+            {
+                <div class="inbox-row @(item.IsRead ? "inbox-read" : "inbox-unread")">
+
+                    <div class="inbox-status-icon"
+                         title="@(item.IsRead ? "Okundu" : "Okunmadı")">
+
+                        <i class="@(item.IsRead
+                                                                 ? "ti-email"
+                                                                 : "ti-email text-primary")">
+                        </i>
 
                     </div>
 
-                    <div class="col-mail col-mail-2">
+                    <a asp-controller="Message"
+                       asp-action="ToggleImportant"
+                       asp-route-id="@item.MessageId"
+                       class="inbox-star @(item.ReceiverIsImportant ? "inbox-star-active" : "")"
+                       title="@(item.ReceiverIsImportant ? "Önemden çıkar" : "Önemli yap")">
 
-                        <div class="subject">
-                            @item.Subject
+                        <i class="ti-star"></i>
+                    </a>
+
+                    <a asp-controller="Message"
+                       asp-action="MessageDetails"
+                       asp-route-id="@item.MessageId"
+                       class="inbox-message-link">
+
+                        <div class="inbox-sender">
+                            @item.SenderMail
                         </div>
 
-                        <div class="date">
+                        <div class="inbox-message-content">
+
+                            <span class="inbox-subject">
+                                @(string.IsNullOrWhiteSpace(item.Subject)
+                                    ? "(Konu bulunmuyor)"
+                                    : item.Subject)
+                            </span>
+
+                            <span class="inbox-preview">
+                                — @item.MessageDetail
+                            </span>
+
+                        </div>
+
+                        <div class="inbox-date">
                             @item.SendDate.ToString(
                                 "dd MMMM",
                                 System.Globalization.CultureInfo.GetCultureInfo("tr-TR"))
                         </div>
 
-                    </div>
+                    </a>
 
-                </a>
+                </div>
+            }
+        }
 
-            </div>
+    </div>
+
+</div>
+
+<style>
+    .inbox-page {
+        overflow: hidden;
+        width: 100%;
+        border: 1px solid #ececf4;
+        border-radius: 16px;
+        background-color: #ffffff;
+        box-shadow: 0 10px 30px rgba(35, 31, 91, 0.06);
+    }
+
+    .inbox-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 21px 24px;
+        background: linear-gradient(135deg, #625df5 0%, #8b6df6 100%);
+        color: #ffffff;
+    }
+
+    .inbox-heading {
+        display: flex;
+        align-items: center;
+    }
+
+    .inbox-heading-icon {
+        width: 46px;
+        height: 46px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-right: 13px;
+        border: 1px solid rgba(255, 255, 255, 0.24);
+        border-radius: 13px;
+        background-color: rgba(255, 255, 255, 0.14);
+        font-size: 20px;
+    }
+
+    .inbox-heading h4 {
+        margin: 0;
+        color: #ffffff;
+        font-size: 20px;
+        font-weight: 600;
+    }
+
+    .inbox-heading p {
+        margin: 4px 0 0;
+        color: rgba(255, 255, 255, 0.78);
+        font-size: 12px;
+    }
+
+    .inbox-count {
+        padding: 7px 12px;
+        border: 1px solid rgba(255, 255, 255, 0.22);
+        border-radius: 20px;
+        background-color: rgba(255, 255, 255, 0.14);
+        color: #ffffff;
+        font-size: 12px;
+        white-space: nowrap;
+    }
+
+    .inbox-toolbar {
+        padding: 18px 22px;
+        border-bottom: 1px solid #efeff5;
+        background-color: #fbfbfe;
+    }
+
+    .inbox-search-form {
+        width: 100%;
+        margin: 0;
+    }
+
+    .inbox-search-box {
+        display: flex;
+        align-items: center;
+        min-height: 46px;
+        overflow: hidden;
+        border: 1px solid #e2e1ec;
+        border-radius: 11px;
+        background-color: #ffffff;
+        transition: all 0.2s ease;
+    }
+
+        .inbox-search-box:focus-within {
+            border-color: #716cff;
+            box-shadow: 0 0 0 3px rgba(113, 108, 255, 0.10);
+        }
+
+        .inbox-search-box > i {
+            margin-left: 15px;
+            color: #9694a8;
+        }
+
+        .inbox-search-box input {
+            min-width: 0;
+            flex: 1;
+            padding: 11px 12px;
+            border: none;
+            outline: none;
+            background-color: transparent;
+            color: #424152;
+            font-size: 13px;
+        }
+
+    .inbox-clear-search {
+        padding: 8px;
+        color: #9997a7;
+    }
+
+        .inbox-clear-search:hover {
+            color: #e65359;
+            text-decoration: none;
+        }
+
+    .inbox-search-button {
+        align-self: stretch;
+        padding: 0 22px;
+        border: none;
+        background: linear-gradient(135deg, #625df5, #8079ff);
+        color: #ffffff;
+        font-size: 13px;
+        font-weight: 500;
+        cursor: pointer;
+    }
+
+    .inbox-row {
+        display: flex;
+        align-items: center;
+        min-height: 68px;
+        padding: 0 20px;
+        border-bottom: 1px solid #efeff5;
+        transition: all 0.2s ease;
+    }
+
+        .inbox-row:last-child {
+            border-bottom: none;
+        }
+
+        .inbox-row:hover {
+            background-color: #f7f6ff;
+            box-shadow: inset 3px 0 0 #716cff;
+        }
+
+    .inbox-unread {
+        background-color: #fbfbff;
+    }
+
+        .inbox-unread .inbox-sender,
+        .inbox-unread .inbox-subject {
+            color: #343242;
+            font-weight: 700;
+        }
+
+    .inbox-read {
+        background-color: #ffffff;
+    }
+
+    .inbox-status-icon {
+        width: 28px;
+        flex-shrink: 0;
+        color: #aaa8b7;
+        font-size: 15px;
+    }
+
+    .inbox-star {
+        width: 30px;
+        flex-shrink: 0;
+        color: #c6c4cf;
+        font-size: 17px;
+        text-decoration: none;
+        transition: all 0.2s ease;
+    }
+
+        .inbox-star:hover,
+        .inbox-star-active {
+            color: #f5b942;
+            text-decoration: none;
+            transform: scale(1.08);
+        }
+
+    .inbox-message-link {
+        display: flex;
+        min-width: 0;
+        flex: 1;
+        align-items: center;
+        color: inherit;
+        text-decoration: none;
+    }
+
+        .inbox-message-link:hover {
+            color: inherit;
+            text-decoration: none;
+        }
+
+    .inbox-sender {
+        overflow: hidden;
+        width: 190px;
+        flex-shrink: 0;
+        padding-right: 20px;
+        color: #666474;
+        font-size: 13px;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    .inbox-message-content {
+        display: flex;
+        min-width: 0;
+        flex: 1;
+        align-items: center;
+        overflow: hidden;
+        font-size: 13px;
+    }
+
+    .inbox-subject {
+        flex-shrink: 0;
+        color: #535161;
+    }
+
+    .inbox-preview {
+        overflow: hidden;
+        margin-left: 5px;
+        color: #9896a5;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    .inbox-date {
+        min-width: 95px;
+        margin-left: 18px;
+        color: #858394;
+        font-size: 12px;
+        text-align: right;
+        white-space: nowrap;
+    }
+
+    .inbox-empty-state {
+        padding: 70px 25px;
+        text-align: center;
+    }
+
+    .inbox-empty-icon {
+        width: 70px;
+        height: 70px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 16px;
+        border-radius: 50%;
+        background-color: #f0efff;
+        color: #716cff;
+        font-size: 27px;
+    }
+
+    .inbox-empty-state h5 {
+        margin-bottom: 7px;
+        color: #454352;
+        font-weight: 600;
+    }
+
+    .inbox-empty-state p {
+        margin-bottom: 18px;
+        color: #9492a1;
+        font-size: 13px;
+    }
+
+    .inbox-empty-button {
+        border-radius: 9px;
+        background-color: #716cff;
+        color: #ffffff;
+    }
+
+        .inbox-empty-button:hover {
+            background-color: #625df5;
+            color: #ffffff;
+        }
+
+    @@media (max-width: 900px) {
+        .inbox-sender {
+            width: 140px;
+        }
+
+        .inbox-preview {
+            display: none;
         }
     }
 
-</div>
+    @@media (max-width: 650px) {
+        .inbox-header,
+        .inbox-toolbar {
+            padding-right: 16px;
+            padding-left: 16px;
+        }
+
+        .inbox-heading p,
+        .inbox-count,
+        .inbox-status-icon {
+            display: none;
+        }
+
+        .inbox-row {
+            padding: 12px 14px;
+        }
+
+        .inbox-message-link {
+            align-items: flex-start;
+            flex-direction: column;
+        }
+
+        .inbox-sender {
+            width: 100%;
+            padding-right: 0;
+        }
+
+        .inbox-message-content {
+            width: 100%;
+            margin-top: 3px;
+        }
+
+        .inbox-date {
+            min-width: auto;
+            margin: 4px 0 0;
+            text-align: left;
+        }
+
+        .inbox-search-button {
+            padding: 0 16px;
+        }
+    }
+</style>

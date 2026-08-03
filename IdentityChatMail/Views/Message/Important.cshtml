@@ -4,39 +4,386 @@
     Layout = "_MessageLayout";
 }
 
-<div class="message-list">
+<div class="important-page">
 
-    @foreach (var item in Model)
-    {
-        <div class="message">
+    <!-- Sayfa başlığı -->
+    <div class="important-header">
 
-            <a href="@Url.Action("MessageDetails", "Message", new { id = item.MessageId })">
+        <div class="important-heading">
 
-                <div class="col-mail col-mail-1">
+            <div class="important-heading-icon">
+                <i class="ti-star"></i>
+            </div>
 
-                    <span class="star-toggle ti-star"
-                          style="color:#ffc107;">
-                    </span>
-
-                </div>
-
-                <div class="col-mail col-mail-2">
-
-                    <div class="subject">
-                        @item.Subject
-                    </div>
-
-                    <div class="date">
-                        @item.SendDate.ToString(
-                            "dd MMMM",
-                            System.Globalization.CultureInfo.GetCultureInfo("tr-TR"))
-                    </div>
-
-                </div>
-
-            </a>
+            <div>
+                <h4>Önemli Mesajlar</h4>
+                <p>Önemli olarak işaretlediğiniz mesajları görüntüleyin.</p>
+            </div>
 
         </div>
-    }
+
+        <span class="important-count">
+            @(Model?.Count ?? 0) mesaj
+        </span>
+
+    </div>
+
+    <!-- Mesaj listesi -->
+    <div class="important-list">
+
+        @if (Model == null || !Model.Any())
+        {
+            <div class="important-empty-state">
+
+                <div class="important-empty-icon">
+                    <i class="ti-star"></i>
+                </div>
+
+                <h5>Önemli mesaj bulunmuyor</h5>
+
+                <p>
+                    Yıldızladığınız mesajlar burada görüntülenecek.
+                </p>
+
+                <a asp-controller="Message"
+                   asp-action="Inbox"
+                   class="btn important-inbox-button">
+
+                    <i class="fa fa-inbox mr-1"></i>
+                    Gelen Kutusuna Git
+                </a>
+
+            </div>
+        }
+        else
+        {
+            @foreach (var item in Model)
+            {
+                <div class="important-row">
+
+                    <!-- Önemden çıkarma yıldızı -->
+                    <a asp-controller="Message"
+                       asp-action="ToggleImportant"
+                       asp-route-id="@item.MessageId"
+                       class="important-star"
+                       title="Önemden çıkar">
+
+                        <i class="ti-star"></i>
+                    </a>
+
+                    <!-- Mesaj detayı -->
+                    <a asp-controller="Message"
+                       asp-action="MessageDetails"
+                       asp-route-id="@item.MessageId"
+                       class="important-message-link">
+
+                        <div class="important-address">
+
+                            <span class="important-address-label">
+                                Gönderen
+                            </span>
+
+                            <span class="important-address-value">
+                                @item.SenderMail
+                            </span>
+
+                        </div>
+
+                        <div class="important-content">
+
+                            <span class="important-subject">
+                                @(string.IsNullOrWhiteSpace(item.Subject)
+                                    ? "(Konu bulunmuyor)"
+                                    : item.Subject)
+                            </span>
+
+                            <span class="important-preview">
+                                — @item.MessageDetail
+                            </span>
+
+                        </div>
+
+                        <div class="important-date">
+
+                            <i class="ti-time"></i>
+
+                            @item.SendDate.ToString(
+                                "dd MMMM",
+                                System.Globalization.CultureInfo.GetCultureInfo("tr-TR"))
+
+                        </div>
+
+                    </a>
+
+                </div>
+            }
+        }
+
+    </div>
 
 </div>
+
+<style>
+    .important-page {
+        overflow: hidden;
+        width: 100%;
+        border: 1px solid #ececf4;
+        border-radius: 16px;
+        background-color: #ffffff;
+        box-shadow: 0 10px 30px rgba(35, 31, 91, 0.06);
+    }
+
+    .important-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 21px 24px;
+        background: linear-gradient( 135deg, #625df5 0%, #8b6df6 100% );
+        color: #ffffff;
+    }
+
+    .important-heading {
+        display: flex;
+        align-items: center;
+    }
+
+    .important-heading-icon {
+        width: 46px;
+        height: 46px;
+        display: flex;
+        flex-shrink: 0;
+        align-items: center;
+        justify-content: center;
+        margin-right: 13px;
+        border: 1px solid rgba(255, 255, 255, 0.24);
+        border-radius: 13px;
+        background-color: rgba(255, 255, 255, 0.14);
+        color: #ffd66b;
+        font-size: 21px;
+    }
+
+    .important-heading h4 {
+        margin: 0;
+        color: #ffffff;
+        font-size: 20px;
+        font-weight: 600;
+    }
+
+    .important-heading p {
+        margin: 4px 0 0;
+        color: rgba(255, 255, 255, 0.78);
+        font-size: 12px;
+    }
+
+    .important-count {
+        padding: 7px 12px;
+        border: 1px solid rgba(255, 255, 255, 0.22);
+        border-radius: 20px;
+        background-color: rgba(255, 255, 255, 0.14);
+        color: #ffffff;
+        font-size: 12px;
+        white-space: nowrap;
+    }
+
+    .important-row {
+        display: flex;
+        align-items: center;
+        min-height: 72px;
+        padding: 0 20px;
+        border-bottom: 1px solid #efeff5;
+        transition: all 0.2s ease;
+    }
+
+        .important-row:last-child {
+            border-bottom: none;
+        }
+
+        .important-row:hover {
+            background-color: #fffaf0;
+            box-shadow: inset 3px 0 0 #f5b942;
+        }
+
+    .important-star {
+        width: 38px;
+        flex-shrink: 0;
+        color: #f5b942;
+        font-size: 19px;
+        text-decoration: none;
+        transition: all 0.2s ease;
+    }
+
+        .important-star:hover {
+            color: #d99a16;
+            text-decoration: none;
+            transform: scale(1.12);
+        }
+
+    .important-message-link {
+        display: flex;
+        min-width: 0;
+        flex: 1;
+        align-items: center;
+        color: inherit;
+        text-decoration: none;
+    }
+
+        .important-message-link:hover {
+            color: inherit;
+            text-decoration: none;
+        }
+
+    .important-address {
+        display: flex;
+        overflow: hidden;
+        width: 200px;
+        flex-shrink: 0;
+        flex-direction: column;
+        padding-right: 20px;
+    }
+
+    .important-address-label {
+        margin-bottom: 2px;
+        color: #aaa8b7;
+        font-size: 10px;
+        font-weight: 600;
+        letter-spacing: 0.5px;
+        text-transform: uppercase;
+    }
+
+    .important-address-value {
+        overflow: hidden;
+        color: #555363;
+        font-size: 13px;
+        font-weight: 600;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    .important-content {
+        display: flex;
+        min-width: 0;
+        flex: 1;
+        align-items: center;
+        overflow: hidden;
+        font-size: 13px;
+    }
+
+    .important-subject {
+        flex-shrink: 0;
+        color: #4e4c5d;
+        font-weight: 600;
+    }
+
+    .important-preview {
+        overflow: hidden;
+        margin-left: 5px;
+        color: #9896a5;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    .important-date {
+        min-width: 110px;
+        margin-left: 18px;
+        color: #858394;
+        font-size: 12px;
+        text-align: right;
+        white-space: nowrap;
+    }
+
+        .important-date i {
+            margin-right: 4px;
+            color: #f5b942;
+        }
+
+    .important-empty-state {
+        padding: 70px 25px;
+        text-align: center;
+    }
+
+    .important-empty-icon {
+        width: 72px;
+        height: 72px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 16px;
+        border-radius: 50%;
+        background-color: #fff6dc;
+        color: #f5b942;
+        font-size: 29px;
+    }
+
+    .important-empty-state h5 {
+        margin-bottom: 7px;
+        color: #454352;
+        font-weight: 600;
+    }
+
+    .important-empty-state p {
+        margin-bottom: 18px;
+        color: #9492a1;
+        font-size: 13px;
+    }
+
+    .important-inbox-button {
+        padding: 10px 16px;
+        border: none;
+        border-radius: 9px;
+        background: linear-gradient( 135deg, #625df5, #8079ff );
+        color: #ffffff;
+    }
+
+        .important-inbox-button:hover {
+            color: #ffffff;
+            box-shadow: 0 7px 15px rgba(98, 93, 245, 0.24);
+            transform: translateY(-1px);
+        }
+
+    @@media (max-width: 900px) {
+        .important-address {
+            width: 150px;
+        }
+
+        .important-preview {
+            display: none;
+        }
+    }
+
+    @@media (max-width: 650px) {
+        .important-header {
+            padding-right: 16px;
+            padding-left: 16px;
+        }
+
+        .important-heading p,
+        .important-count {
+            display: none;
+        }
+
+        .important-row {
+            padding: 12px 14px;
+        }
+
+        .important-message-link {
+            align-items: flex-start;
+            flex-direction: column;
+        }
+
+        .important-address {
+            width: 100%;
+            padding-right: 0;
+        }
+
+        .important-content {
+            width: 100%;
+            margin-top: 5px;
+        }
+
+        .important-date {
+            min-width: auto;
+            margin: 5px 0 0;
+            text-align: left;
+        }
+    }
+</style>

@@ -4,85 +4,544 @@
     Layout = "_MessageLayout";
 
     var userEmail = ViewBag.CurrentUserEmail as string;
+    var profileImage = ViewBag.ProfilImageUrl as string;
+
+    var senderName =
+        $"{ViewBag.Name as string ?? ""} {ViewBag.Surname as string ?? ""}".Trim();
 
     var isImportant = Model.ReceiverEmail == userEmail
         ? Model.ReceiverIsImportant
         : Model.SenderIsImportant;
+
+    var backAction = Model.ReceiverEmail == userEmail
+        ? "Inbox"
+        : "Sendbox";
 }
 
-<div class="read-content">
+<div class="details-page">
 
-    <div class="media pt-5">
+    <!-- Üst başlık -->
+    <div class="details-header">
 
-        <img class="mr-3 rounded-circle"
-             src="@ViewBag.ProfilImageUrl"
-             width="60"
-             height="60"
-             alt="Kullanıcı avatarı" />
+        <div class="details-heading">
 
-        <div class="media-body">
+            <div class="details-heading-icon">
+                <i class="ti-email"></i>
+            </div>
 
-            <h5 class="m-b-3">
-                @(ViewBag.Name ?? "AD YOK") @(ViewBag.Surname ?? "SOYAD YOK")
+            <div>
+                <h4>Mesaj Detayı</h4>
+                <p>Mesaj bilgilerini görüntüleyin.</p>
+            </div>
+
+        </div>
+
+        <a asp-controller="Message"
+           asp-action="@backAction"
+           class="details-back-button">
+
+            <i class="ti-arrow-left"></i>
+            Geri Dön
+        </a>
+
+    </div>
+
+    <!-- Gönderen bilgisi -->
+    <div class="details-sender">
+
+        <div class="details-avatar-wrapper">
+
+            @if (!string.IsNullOrWhiteSpace(profileImage))
+            {
+                <img src="@profileImage"
+                     class="details-avatar"
+                     alt="Gönderen profil fotoğrafı" />
+            }
+            else
+            {
+                <div class="details-avatar-placeholder">
+                    <i class="fa fa-user"></i>
+                </div>
+            }
+
+            <span class="details-avatar-status"></span>
+
+        </div>
+
+        <div class="details-sender-info">
+
+            <h5>
+                @(string.IsNullOrWhiteSpace(senderName)
+                    ? "Kullanıcı"
+                    : senderName)
             </h5>
 
-            <p class="m-b-2">
+            <span class="details-sender-email">
+                <i class="ti-email"></i>
+                @Model.SenderMail
+            </span>
+
+        </div>
+
+        <div class="details-date">
+
+            <strong>
                 @Model.SendDate.ToString(
                     "dd MMMM yyyy",
                     System.Globalization.CultureInfo.GetCultureInfo("tr-TR"))
-            </p>
+            </strong>
 
-        </div>
-    </div>
-
-    <hr />
-
-    <div class="media mb-4 mt-1">
-        <div class="media-body">
-
-            <span class="float-right">
+            <span>
+                <i class="ti-time"></i>
                 @Model.SendDate.ToString("HH:mm")
             </span>
 
-            <h4 class="m-0 text-primary">
-                @Model.Subject
-            </h4>
-
-            <small class="text-muted">
-                @Model.ReceiverEmail
-            </small>
-
         </div>
+
     </div>
 
-    <p>
-        @Model.MessageDetail
-    </p>
+    <!-- Mesaj bilgileri -->
+    <div class="details-information">
 
-    <hr />
+        <div class="details-information-row">
 
-    <a href="@Url.Action(
-                                     "ToggleImportant",
-                                     "Message",
-                                     new { id = Model.MessageId })"
-       class="btn @(isImportant ? "btn-warning" : "btn-outline-warning")">
+            <span class="details-information-label">
+                <i class="ti-user"></i>
+                Gönderen
+            </span>
 
-        <i class="ti-star"></i>
+            <span class="details-information-value">
+                @Model.SenderMail
+            </span>
 
-        @(isImportant ? "Önemden Çıkar" : "Önemli Yap")
-    </a>
-    <br />
-    <br />
-    <a href="@Url.Action(
-                                 "MoveToTrash",
-                                 "Message",
-                                 new { id = Model.MessageId })"
-       class="btn btn-outline-danger"
-       onclick="return confirm('Mesaj çöp kutusuna taşınsın mı?')">
+        </div>
 
-        <i class="ti-trash"></i>
-        Çöp Kutusuna Taşı
-    </a>
+        <div class="details-information-row">
 
+            <span class="details-information-label">
+                <i class="ti-target"></i>
+                Alıcı
+            </span>
+
+            <span class="details-information-value">
+                @Model.ReceiverEmail
+            </span>
+
+        </div>
+
+    </div>
+
+    <!-- Konu ve mesaj -->
+    <div class="details-message">
+
+        <div class="details-subject">
+
+            <span class="details-subject-label">
+                Konu
+            </span>
+
+            <h3>
+                @(string.IsNullOrWhiteSpace(Model.Subject)
+                    ? "(Konu bulunmuyor)"
+                    : Model.Subject)
+            </h3>
+
+        </div>
+
+        <div class="details-message-body">
+            @Model.MessageDetail
+        </div>
+
+    </div>
+
+    <!-- İşlem butonları -->
+    <div class="details-actions">
+
+        <a asp-controller="Message"
+           asp-action="ToggleImportant"
+           asp-route-id="@Model.MessageId"
+           class="details-action-button
+            @(isImportant
+               ? "details-important-active"
+               : "details-important-button")">
+
+            <i class="ti-star"></i>
+
+            @(isImportant
+                ? "Önemden Çıkar"
+                : "Önemli Yap")
+        </a>
+
+        <a asp-controller="Message"
+           asp-action="MoveToTrash"
+           asp-route-id="@Model.MessageId"
+           class="details-action-button details-trash-button"
+           onclick="return confirm('Mesaj çöp kutusuna taşınsın mı?')">
+
+            <i class="ti-trash"></i>
+            Çöp Kutusuna Taşı
+        </a>
+
+    </div>
 
 </div>
+
+<style>
+    .details-page {
+        overflow: hidden;
+        width: 100%;
+        border: 1px solid #ececf4;
+        border-radius: 16px;
+        background-color: #ffffff;
+        box-shadow: 0 10px 30px rgba(35, 31, 91, 0.06);
+    }
+
+    .details-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 21px 24px;
+        background: linear-gradient( 135deg, #625df5 0%, #8b6df6 100% );
+        color: #ffffff;
+    }
+
+    .details-heading {
+        display: flex;
+        align-items: center;
+    }
+
+    .details-heading-icon {
+        width: 46px;
+        height: 46px;
+        display: flex;
+        flex-shrink: 0;
+        align-items: center;
+        justify-content: center;
+        margin-right: 13px;
+        border: 1px solid rgba(255, 255, 255, 0.24);
+        border-radius: 13px;
+        background-color: rgba(255, 255, 255, 0.14);
+        font-size: 20px;
+    }
+
+    .details-heading h4 {
+        margin: 0;
+        color: #ffffff;
+        font-size: 20px;
+        font-weight: 600;
+    }
+
+    .details-heading p {
+        margin: 4px 0 0;
+        color: rgba(255, 255, 255, 0.78);
+        font-size: 12px;
+    }
+
+    .details-back-button {
+        display: inline-flex;
+        align-items: center;
+        padding: 9px 14px;
+        border: 1px solid rgba(255, 255, 255, 0.24);
+        border-radius: 9px;
+        background-color: rgba(255, 255, 255, 0.14);
+        color: #ffffff;
+        font-size: 12px;
+        transition: all 0.2s ease;
+    }
+
+        .details-back-button i {
+            margin-right: 7px;
+        }
+
+        .details-back-button:hover {
+            background-color: #ffffff;
+            color: #625df5;
+            text-decoration: none;
+        }
+
+    .details-sender {
+        display: flex;
+        align-items: center;
+        padding: 23px 25px;
+        border-bottom: 1px solid #efeff5;
+        background-color: #fbfbfe;
+    }
+
+    .details-avatar-wrapper {
+        position: relative;
+        width: 60px;
+        height: 60px;
+        flex-shrink: 0;
+    }
+
+    .details-avatar,
+    .details-avatar-placeholder {
+        width: 60px;
+        height: 60px;
+        border: 3px solid #ffffff;
+        border-radius: 50%;
+        background-color: #ffffff;
+        box-shadow: 0 5px 14px rgba(60, 54, 130, 0.15);
+    }
+
+    .details-avatar {
+        object-fit: cover;
+    }
+
+    .details-avatar-placeholder {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #716cff;
+        font-size: 24px;
+    }
+
+    .details-avatar-status {
+        position: absolute;
+        right: 1px;
+        bottom: 2px;
+        width: 14px;
+        height: 14px;
+        border: 3px solid #ffffff;
+        border-radius: 50%;
+        background-color: #32d583;
+    }
+
+    .details-sender-info {
+        min-width: 0;
+        flex: 1;
+        margin-left: 14px;
+    }
+
+        .details-sender-info h5 {
+            overflow: hidden;
+            margin: 0;
+            color: #3f3d4d;
+            font-size: 16px;
+            font-weight: 600;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+    .details-sender-email {
+        display: block;
+        overflow: hidden;
+        margin-top: 5px;
+        color: #8c8a99;
+        font-size: 12px;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+        .details-sender-email i {
+            margin-right: 5px;
+            color: #716cff;
+        }
+
+    .details-date {
+        display: flex;
+        flex-shrink: 0;
+        flex-direction: column;
+        align-items: flex-end;
+        margin-left: 20px;
+    }
+
+        .details-date strong {
+            color: #5c5a69;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .details-date span {
+            margin-top: 5px;
+            color: #9a98a7;
+            font-size: 12px;
+        }
+
+        .details-date i {
+            margin-right: 4px;
+            color: #716cff;
+        }
+
+    .details-information {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 12px;
+        padding: 20px 25px 0;
+    }
+
+    .details-information-row {
+        display: flex;
+        min-width: 0;
+        flex-direction: column;
+        padding: 13px 15px;
+        border: 1px solid #ecebf3;
+        border-radius: 10px;
+        background-color: #fafafe;
+    }
+
+    .details-information-label {
+        margin-bottom: 6px;
+        color: #9997a6;
+        font-size: 10px;
+        font-weight: 600;
+        letter-spacing: 0.5px;
+        text-transform: uppercase;
+    }
+
+        .details-information-label i {
+            margin-right: 5px;
+            color: #716cff;
+        }
+
+    .details-information-value {
+        overflow: hidden;
+        color: #535160;
+        font-size: 13px;
+        font-weight: 500;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    .details-message {
+        padding: 25px;
+    }
+
+    .details-subject {
+        padding-bottom: 18px;
+        border-bottom: 1px solid #efeff5;
+    }
+
+    .details-subject-label {
+        display: block;
+        margin-bottom: 7px;
+        color: #9b99a8;
+        font-size: 10px;
+        font-weight: 600;
+        letter-spacing: 0.7px;
+        text-transform: uppercase;
+    }
+
+    .details-subject h3 {
+        margin: 0;
+        color: #3f3d4d;
+        font-size: 21px;
+        font-weight: 600;
+        line-height: 1.4;
+    }
+
+    .details-message-body {
+        min-height: 170px;
+        padding: 25px 5px;
+        color: #5d5b69;
+        font-size: 14px;
+        line-height: 1.8;
+        white-space: pre-wrap;
+        word-break: break-word;
+    }
+
+    .details-actions {
+        display: flex;
+        align-items: center;
+        justify-content: flex-end;
+        gap: 9px;
+        padding: 18px 25px;
+        border-top: 1px solid #efeff5;
+        background-color: #fbfbfe;
+    }
+
+    .details-action-button {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 42px;
+        padding: 9px 15px;
+        border-radius: 9px;
+        font-size: 13px;
+        font-weight: 500;
+        transition: all 0.2s ease;
+    }
+
+        .details-action-button i {
+            margin-right: 7px;
+        }
+
+    .details-important-button {
+        border: 1px solid #f3d58b;
+        background-color: #fffaf0;
+        color: #c28a14;
+    }
+
+        .details-important-button:hover {
+            background-color: #fff1c8;
+            color: #a87309;
+            text-decoration: none;
+        }
+
+    .details-important-active {
+        border: 1px solid #f5b942;
+        background-color: #f5b942;
+        color: #ffffff;
+    }
+
+        .details-important-active:hover {
+            background-color: #dea52d;
+            color: #ffffff;
+            text-decoration: none;
+        }
+
+    .details-trash-button {
+        border: 1px solid #ffb8bb;
+        background-color: #fff3f3;
+        color: #e65359;
+    }
+
+        .details-trash-button:hover {
+            border-color: #ff5c62;
+            background-color: #ff5c62;
+            color: #ffffff;
+            text-decoration: none;
+        }
+
+    @@media (max-width: 700px) {
+        .details-header,
+        .details-sender,
+        .details-message,
+        .details-actions {
+            padding-right: 17px;
+            padding-left: 17px;
+        }
+
+        .details-heading p {
+            display: none;
+        }
+
+        .details-back-button {
+            padding-right: 11px;
+            padding-left: 11px;
+        }
+
+        .details-sender {
+            align-items: flex-start;
+        }
+
+        .details-date {
+            display: none;
+        }
+
+        .details-information {
+            grid-template-columns: 1fr;
+            padding-right: 17px;
+            padding-left: 17px;
+        }
+
+        .details-actions {
+            align-items: stretch;
+            flex-direction: column;
+        }
+
+        .details-action-button {
+            width: 100%;
+        }
+    }
+</style>
